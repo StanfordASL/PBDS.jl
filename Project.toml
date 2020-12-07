@@ -1,0 +1,27 @@
+name = "PBDS"
+uuid = "5f01a6e0-657c-4950-bc4f-54ae38a49d4c"
+authors = ["ambyld <bylard@stanford.edu>"]
+version = "0.1.0"
+
+[deps]
+AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
+Base64 = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+ComputedFieldTypes = "459fdd68-db75-56b8-8c15-d717a790f88e"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+GeometryBasics = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+MeshCat = "283c5d60-a78f-5afe-a0af-af636b173e11"
+MeshCatMechanisms = "6ad125db-dd91-5488-b820-c1df6aab299d"
+RigidBodyDynamics = "366cf18f-59d5-5db9-a4de-86a9f6786172"
+Rotations = "6038ab10-8711-5258-84ad-4b1120ba62dc"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+StaticNumbers = "c5e4b96a-f99f-5557-8ed2-dc63ef9b5131"
+
+[compat]
+julia = "1.5"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
