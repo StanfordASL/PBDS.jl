@@ -28,16 +28,9 @@ function task_map_emb_chart(::EmbRep, ::ChartRep, xme,
 end
 
 # S2
-function task_map_emb_chart(::EmbRep, ::ChartRep, xme,
-        task_map::AngularPositionAroundPoint{R3,S2,S}, CN::Chart{<:SterProj,S2}) where S
-    a = xme - task_map.position_center
-    â = a ./ norm(a)
-    emb_to_chart(â, CN)
-end
+PBDS.codomain_coord_rep(::AngularPositionAroundPoint{R3,S2,S}) where S = EmbRep()
 
-# S2 embedded
-function task_map_emb(::EmbRep, ::EmbRep, xme,
+function PBDS.task_map_emb(::EmbRep, ::EmbRep, xme,
         task_map::AngularPositionAroundPoint{R3,S2,S}) where S
-    a = xme - task_map.position_center
-    â = a ./ norm(a)
+    xme
 end
