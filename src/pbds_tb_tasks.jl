@@ -97,7 +97,7 @@ end
 function single_task_acceleration(xm, vm, task::Task{<:TaskMapT{M,N,S}}, CM::Chart{I,M},
         CN::Chart{J,N}) where {M,N,S,I,J}
     m, n = dim(M), dim(N)
-    !isglobal(CN) && (CN = choose_chart_emb(xm, task, CM, CN))
+    CN = isglobal(CN) ? CN : choose_chart_emb(xm, task, CM, CN)
     Jft_JfΞv, Jft_A = single_task_components(xm, vm, task, CM, CN)
     σxddot = SMatrix{m,m,S}(pinv(Matrix(Jft_JfΞv)))*Jft_A
     σxddot, CN
@@ -110,7 +110,7 @@ function multiple_task_acceleration(xm, vm, tasks::TaskTList, CM::Chart{I,M}, CN
     Jft_A_sum = zeros(m)
     CNs_out = ChartList()
     for i in 1:length(tasks)
-        !isglobal(CNs[i]) ? CN = choose_chart_emb(xm, tasks[i], CM, CNs[i]) : CN = CNs[i]
+        CN = isglobal(CNs[i]) ? CNs[i] : choose_chart_emb(xm, tasks[i], CM, CNs[i])
         Jft_JfΞv, Jft_A = single_task_components(xm, vm, tasks[i], CM, CN)
         Jft_JfΞv_sum += Jft_JfΞv
         Jft_A_sum += Jft_A

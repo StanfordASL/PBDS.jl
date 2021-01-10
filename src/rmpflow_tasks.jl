@@ -38,8 +38,8 @@ end
 function single_task_acceleration(xm, vm, task::TaskGDS{<:TaskMapT{M,N,S}}, CM::Chart{I,M},
         CN::Chart{J,N}, robot_coord_rep=ChartRep()) where {M,N,S,I,J}
     m, n = dim(M), dim(N)
-    robot_coord_rep == EmbRep() && ((xm, vm) = emb_to_chart_differential(xm, vm, CM))
-    !isglobal(CN) && (CN = choose_chart_chart(xm, task, CM, CN))
+    (xm, vm) = robot_coord_rep == EmbRep() ? emb_to_chart_differential(xm, vm, CM) : (xm, vm)
+    CN = isglobal(CN) ? CN : choose_chart_chart(xm, task, CM, CN)
     JftAJf, JftA_a = single_task_components(xm, vm, task, CM, CN)
     σxddot = SMatrix{m,m,S}(pinv(Matrix(JftAJf)))*JftA_a
     if robot_coord_rep == EmbRep()
@@ -55,9 +55,9 @@ function multiple_task_acceleration(xm, vm, tasks::TaskGDSList, CM::Chart{I,M}, 
     JftA_a_sum = zeros(m)
     CNs_out = ChartList()
 
-    robot_coord_rep == EmbRep() && ((xm, vm) = emb_to_chart_differential(xm, vm, CM))
+    (xm, vm) = robot_coord_rep == EmbRep() ? emb_to_chart_differential(xm, vm, CM) : (xm, vm)
     for i in 1:length(tasks)
-        !isglobal(CNs[i]) ? CN = choose_chart_chart(xm, tasks[i], CM, CNs[i]) : CN = CNs[i]
+        CN = isglobal(CNs[i]) ? CNs[i] : choose_chart_chart(xm, tasks[i], CM, CNs[i])
         JftAJf, JftA_a = single_task_components(xm, vm, tasks[i], CM, CN)
         JftAJf_sum += JftAJf
         JftA_a_sum += JftA_a

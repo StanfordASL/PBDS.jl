@@ -3,7 +3,7 @@ module PBDS
 
 using ComputedFieldTypes
 using LinearAlgebra, ForwardDiff
-using StaticArrays, StaticNumbers
+using StaticArrays, StaticNumbers, Tullio
 using RigidBodyDynamics, MeshCatMechanisms
 using GeometryBasics, Rotations
 using Base64

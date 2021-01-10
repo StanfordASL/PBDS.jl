@@ -33,8 +33,8 @@ end
 function single_task_acceleration(xm, vm, task::Task{<:BaseTaskMap}, CM::Chart{I,M},
         CN::Chart{J,N}, robot_coord_rep=ChartRep()) where {M,N,I,J}
     m, n = dim(M), dim(N)
-    robot_coord_rep == EmbRep() && ((xm, vm) = emb_to_chart_differential(xm, vm, CM))
-    !isglobal(CN) && (CN = choose_chart_chart(xm, task, CM, CN))
+    (xm, vm) = robot_coord_rep == EmbRep() ? emb_to_chart_differential(xm, vm, CM) : (xm, vm)
+    CN = isglobal(CN) ? CN : choose_chart_chart(xm, task, CM, CN)
     JftWJf, JftWA = single_task_components(xm, vm, task, CM, CN)
     σxddot = SMatrix{m,m,eltype(xm)}(pinv(Matrix(JftWJf)))*JftWA
     if robot_coord_rep == EmbRep()
@@ -50,9 +50,9 @@ function multiple_task_acceleration(xm, vm, tasks::TaskList, CM::Chart{I,M}, CNs
     JftWA_sum = zeros(m)
     CNs_out = ChartList()
 
-    robot_coord_rep == EmbRep() && ((xm, vm) = emb_to_chart_differential(xm, vm, CM))
+    (xm, vm) = robot_coord_rep == EmbRep() ? emb_to_chart_differential(xm, vm, CM) : (xm, vm)
     for i in 1:length(tasks)
-        !isglobal(CNs[i]) ? CN = choose_chart_chart(xm, tasks[i], CM, CNs[i]) : CN = CNs[i]
+        CN = isglobal(CNs[i]) ? CNs[i] : choose_chart_chart(xm, tasks[i], CM, CNs[i])
         JftWJf, JftWA = single_task_components(xm, vm, tasks[i], CM, CN)
         JftWJf_sum += JftWJf
         JftWA_sum += JftWA
@@ -100,14 +100,10 @@ function task_map_pullback!(JftWJfm_sum, Am_sum, Bm_sum, JftWginvℱm_sum, Γm_s
     Am_sum .+= Am
     Bm_sum .+= Bm
     JftWginvℱm_sum .+= JftWginvℱm
-    
-    m_inds, n_inds = static(1):static(m), static(1):static(n)
-    Γmnn = SArray{Tuple{m,n,n},eltype(xm)}([sum(Tuple(Jf[l,i]*Γn_sum[l,h,k]
-        for l=n_inds)) for i=m_inds, h=n_inds, k=n_inds])
-    Γmmn = SArray{Tuple{m,m,n},eltype(xm)}([sum(Tuple(Jf[h,s]*Γmnn[l,h,k]
-        for h=n_inds)) for l=m_inds, s=m_inds, k=n_inds])
-    Γm = SArray{Tuple{m,m,m},eltype(xm)}([sum(Tuple(Jf[k,q]*Γmmn[l,h,k]
-        for k=n_inds)) for l=m_inds, h=m_inds, q=m_inds])
+
+    @tullio Γmnn[i,h,k] := Jf[l,i]*Γn_sum[l,h,k]
+    @tullio Γmmn[l,s,k] := Jf[h,s]*Γmnn[l,h,k]
+    @tullio Γm[l,h,q] := Jf[k,q]*Γmmn[l,h,k]
 
     Γm_sum .+= Γm 
 
@@ -167,14 +163,10 @@ function task_components!(JftWJfm_sum, Am_sum, Bm_sum, JftWginvℱm_sum, Γm_sum
         ℱ_dis = dissipative_forces_chart(xn, vn, task, CN)
         ℱ = ℱ_pot + ℱ_dis
 
-        m_inds, n_inds = static(1):static(m), static(1):static(n)
-        Γmnn = SArray{Tuple{m,n,n},eltype(xm)}([sum(Tuple(Jf[l,i]*Γn[l,h,k]
-            for l=n_inds)) for i=m_inds, h=n_inds, k=n_inds])
-        Γmmn = SArray{Tuple{m,m,n},eltype(xm)}([sum(Tuple(Jf[h,s]*Γmnn[l,h,k]
-            for h=n_inds)) for l=m_inds, s=m_inds, k=n_inds])
-
+        @tullio Γmnn[i,h,k] := Jf[l,i]*Γn[l,h,k]
+        @tullio Γmmn[l,s,k] := Jf[h,s]*Γmnn[l,h,k]
         JftW = Jf'*W
-        Γm = [sum(Tuple(JftW[q,k]*Γmmn[l,h,k] for k=n_inds)) for l=m_inds, h=m_inds, q=m_inds]
+        @tullio Γm[l,h,q] := JftW[q,k]*Γmmn[l,h,k]
 
         JftWJf = Jf'*W*Jf
         Am = Jf'*W*Jfdot
@@ -224,7 +216,7 @@ function task_acceleration(xm, vm, node::TreeNode{M}, CM::Chart{I,M}, robot_coor
     JftWginvℱ_sum = zeros(m)
     Γ_sum = zeros(m,m,m)
 
-    robot_coord_rep == EmbRep() && ((xm, vm) = emb_to_chart_differential(xm, vm, CM))
+    (xm, vm) = robot_coord_rep == EmbRep() ? emb_to_chart_differential(xm, vm, CM) : (xm, vm)
     for child in children(node)
         if !isglobal(child.chart)
             CN_child = choose_chart_chart(xm, child.data, CM, child.chart)
