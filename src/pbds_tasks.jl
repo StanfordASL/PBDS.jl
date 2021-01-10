@@ -77,7 +77,6 @@ function task_map_pullback!(JftWJfm_sum, Am_sum, Bm_sum, JftWginvℱm_sum, Γm_s
     task_map = node.data
         
     Jf = task_jacobian_chart(xm, task_map, CM, CN)
-    Jfdot = task_jacobian_chart_dot(xm, vm, task_map, CM, CN)
     xn = task_map_chart(xm, task_map, CM, CN)
     vn = Jf*vm
     
@@ -90,22 +89,36 @@ function task_map_pullback!(JftWJfm_sum, Am_sum, Bm_sum, JftWginvℱm_sum, Γm_s
         task_map_pullback!(JftWJfn_sum, An_sum, Bn_sum, JftWginvℱn_sum, Γn_sum,
             xn, vn, child, CN, CN_child; log_tasks)
     end
-
-    JftWJfm = Jf'*JftWJfn_sum*Jf
-    Am = Jf'*(An_sum*Jf + Bn_sum*Jfdot)
-    Bm = Jf'*Bn_sum*Jf
-    JftWginvℱm = Jf'*JftWginvℱn_sum
-
-    JftWJfm_sum .+= JftWJfm
+    
+    if Bn_sum != @SMatrix zeros(n,n)
+        Jfdot = task_jacobian_chart_dot(xm, vm, task_map, CM, CN)
+        Am = Jf'*(An_sum*Jf + Bn_sum*Jfdot)
+        Bm = Jf'*Bn_sum*Jf
+        Bm_sum .+= Bm
+        log_tasks && push!(node.traj_log.B, Bm)
+    else
+        Am = Jf'*An_sum*Jf
+    end
     Am_sum .+= Am
-    Bm_sum .+= Bm
-    JftWginvℱm_sum .+= JftWginvℱm
 
-    @tullio Γmnn[i,h,k] := Jf[l,i]*Γn_sum[l,h,k]
-    @tullio Γmmn[l,s,k] := Jf[h,s]*Γmnn[l,h,k]
-    @tullio Γm[l,h,q] := Jf[k,q]*Γmmn[l,h,k]
+    if JftWJfn_sum != @SMatrix zeros(n,n)
+        JftWJfm = Jf'*JftWJfn_sum*Jf
+        JftWJfm_sum .+= JftWJfm
+        log_tasks && push!(node.traj_log.JftWJf, JftWJfm)
+        if JftWginvℱn_sum != @SVector zeros(n)
+            JftWginvℱm = Jf'*JftWginvℱn_sum
+            JftWginvℱm_sum .+= JftWginvℱm
+            log_tasks && push!(node.traj_log.JftWginvℱ, JftWginvℱm)
+        end
+    end
 
-    Γm_sum .+= Γm 
+    if Γn_sum != @SArray zeros(n,n,n)
+        @tullio Γmnn[i,h,k] := Jf[l,i]*Γn_sum[l,h,k]
+        @tullio Γmmn[l,s,k] := Jf[h,s]*Γmnn[l,h,k]
+        @tullio Γm[l,h,q] := Jf[k,q]*Γmmn[l,h,k]
+        Γm_sum .+= Γm
+        log_tasks && push!(node.traj_log.Γ, Γm)
+    end
 
     if log_tasks
         if node.coord_rep == ChartRep()
@@ -117,11 +130,7 @@ function task_map_pullback!(JftWJfm_sum, Am_sum, Bm_sum, JftWginvℱm_sum, Γm_s
             push!(node.traj_log.v, vne)
         end
         push!(node.traj_log.chart, CN)
-        push!(node.traj_log.Γ, Γm)
-        push!(node.traj_log.JftWJf, JftWJfm)
-        push!(node.traj_log.JftWginvℱ, JftWginvℱm)
         push!(node.traj_log.A, Am)
-        push!(node.traj_log.B, Bm)
     end
 
     nothing
@@ -152,6 +161,7 @@ function task_components!(JftWJfm_sum, Am_sum, Bm_sum, JftWginvℱm_sum, Γm_sum
     W = weight_metric_chart(xn, vn, task, CN)
 
     if W != @SMatrix zeros(n,n)
+        JftW = Jf'*W
         Jfdot = task_jacobian_chart_dot(xm, vm, task, CM, CN)
         Γn = christoffel_symbols(xn, task, CN)
         if any(isinf.(Γn)) || any(isnan.(Γn))
@@ -162,29 +172,31 @@ function task_components!(JftWJfm_sum, Am_sum, Bm_sum, JftWginvℱm_sum, Γm_sum
         ℱ_pot = potential_force_chart(xn, task, CN)
         ℱ_dis = dissipative_forces_chart(xn, vn, task, CN)
         ℱ = ℱ_pot + ℱ_dis
-
-        @tullio Γmnn[i,h,k] := Jf[l,i]*Γn[l,h,k]
-        @tullio Γmmn[l,s,k] := Jf[h,s]*Γmnn[l,h,k]
-        JftW = Jf'*W
-        @tullio Γm[l,h,q] := JftW[q,k]*Γmmn[l,h,k]
-
         JftWJf = Jf'*W*Jf
-        Am = Jf'*W*Jfdot
-        Bm = JftWJf
-        JftWginvℱm = Jf'*W*inv(g)*ℱ
-        
-        Γm_sum .+= Γm
         JftWJfm_sum .+= JftWJf
-        Am_sum .+= Am
+        Bm = JftWJf
         Bm_sum .+= Bm
-        JftWginvℱm_sum .+= JftWginvℱm
 
+        if ℱ != @SVector zeros(n)
+            JftWginvℱm = Jf'*W*inv(g)*ℱ
+            JftWginvℱm_sum .+= JftWginvℱm
+            log_tasks && push!(node.traj_log.JftWginvℱ, JftWginvℱm)
+        end
+        if Γn != @SArray zeros(n,n,n)
+            @tullio Γmnn[i,h,k] := Jf[l,i]*Γn[l,h,k]
+            @tullio Γmmn[l,s,k] := Jf[h,s]*Γmnn[l,h,k]
+            @tullio Γm[l,h,q] := JftW[q,k]*Γmmn[l,h,k]
+            Γm_sum .+= Γm
+            log_tasks && push!(node.traj_log.Γ, Γm)
+        end
+
+        Am = Jf'*W*Jfdot
+        Am_sum .+= Am
+        
         if log_tasks
             push!(node.traj_log.g, g)
             push!(node.traj_log.ginv, inv(g))
-            push!(node.traj_log.Γ, Γm)
             push!(node.traj_log.JftWJf, JftWJf)
-            push!(node.traj_log.JftWginvℱ, JftWginvℱm)
             push!(node.traj_log.A, Am)
             push!(node.traj_log.B, Bm)
         end

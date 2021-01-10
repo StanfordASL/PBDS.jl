@@ -4,6 +4,7 @@ function christoffel_symbols(pn, task::Task{<:TaskMapT{M,N,S}}, C::Chart{I,N}) w
     n = dim(T{N})
     Ginv = inv(metric_chart(pn, task, C))
     ∂G_∂xn_matrix = ForwardDiff.jacobian(pn -> reshape(metric_chart(pn, task, C), n^2), pn)
+    ∂G_∂xn_matrix == (@SMatrix zeros(n^2,n)) && return @SArray zeros(n,n,n)
     ∂G_∂xn = SArray{Tuple{n,n,n},S}(reshape(∂G_∂xn_matrix, n, n, n))
     inds = static(1):static(n)
     Γ = SArray{Tuple{n,n,n},S}([0.5*sum(Tuple(Ginv[k,l]*(∂G_∂xn[j,l,i]+∂G_∂xn[i,l,j]-∂G_∂xn[i,j,l])
@@ -14,6 +15,7 @@ function christoffel_symbols(pn, task::Task{<:BaseTaskMap}, CN)
     n, S = dim(codomain_manifold(task)), eltype(pn)
     Ginv = inv(metric_chart(pn, task, CN))
     ∂G_∂xn_matrix = ForwardDiff.jacobian(pn -> reshape(metric_chart(pn, task, CN), n^2), pn)
+    ∂G_∂xn_matrix == (@SMatrix zeros(n^2,n)) && return @SArray zeros(n,n,n)
     ∂G_∂xn = SArray{Tuple{n,n,n},S}(reshape(∂G_∂xn_matrix, n, n, n))
     inds = static(1):static(n)
     Γ = SArray{Tuple{n,n,n},S}([0.5*sum(Tuple(Ginv[k,l]*(∂G_∂xn[j,l,i]+∂G_∂xn[i,l,j]-∂G_∂xn[i,j,l])
@@ -23,6 +25,7 @@ end
 function christoffel_symbols_chart_transition(pn1, Γ1, C1::Chart{I,N},
         C2::Chart{J,N}) where {N,I,J}
     n, S = dim(N), eltype(pn1)
+    Γ1 == (@SArray zeros(n,n,n)) && return @SArray zeros(n,n,n)
     pn2 = chart_transition(pn1, C1, C2)
     ∂pn1_∂pn2 = chart_transition_jacobian(pn2, C2, C1)
     ∂pn2_∂pn1 = inv(∂pn1_∂pn2)
