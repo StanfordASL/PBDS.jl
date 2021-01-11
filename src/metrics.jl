@@ -49,6 +49,8 @@ default_metric(pne, task::Task{<:TaskMap{M,𝕊{n},S}}) where {M,n,S} =
     SMatrix{n+1,n+1,eltype(pne)}(I)
 
 ## Weight metrics
+weight_metric_coord_rep(task::Task{<:Union{BaseTaskMap,TaskMapT}}) = default_coord_rep(task)
+
 function weight_metric_from_home_chart(pni, wni, task::Task{<:BaseTaskMap}, Ci)
     Ch = home_task_chart(task)
     pnh, wnh = chart_transition_differential(pni, wni, Ci, Ch)
@@ -63,13 +65,32 @@ function weight_metric_from_emb(pn, wn, task::Task{<:BaseTaskMap}, C)
     W = ∂pne_∂pn'*We*∂pne_∂pn
 end
 
-weight_metric_coord_rep(task::Task{<:Union{BaseTaskMap,TaskMapT}}) = default_coord_rep(task)
 weight_metric_chart(pn, wn, task::Task{<:Union{BaseTaskMap,TaskMapT}}, C::Chart) =
     weight_metric_chart(weight_metric_coord_rep(task), pn, wn, task, C)
 weight_metric_chart(::EmbRep, pn, wn, task, C) = weight_metric_from_emb(pn, wn, task, C)
 weight_metric_chart(::ChartRep, pn, wn, task, C) =
     weight_metric_from_home_chart(pn, wn, task, C)
 weight_metric_emb(pne, wne, task) = throw("Not defined!")
+
+# function active_weight_position_from_home_chart(pn, task::Task{<:BaseTaskMap}, C)
+#     Ch = home_task_chart(task)
+#     pnh = chart_transition(pni, Ci, Ch)
+#     active_weight_position_chart(pnh, task, Ch)
+# end
+
+# function active_weight_position_from_emb(pn, task::Task{<:BaseTaskMap}, C)
+#     pne = chart_to_emb(pn, C)
+#     active_weight_position_emb(pne, task)
+# end
+
+# active_weight_position_chart(pn, task::Task{<:Union{BaseTaskMap,TaskMapT}}, C::Chart) =
+#     active_weight_position_chart(weight_metric_coord_rep(task), pn, C)
+# active_weight_position_chart(::EmbRep, pn, C) = active_weight_position_from_emb(pn, wn, task, C)
+# active_weight_position_chart(::ChartRep, pn, C) = 
+#     active_weight_position_from_home_chart(pn, task, C)
+# active_weight_position_emb(pne, task) = throw("Not defined!")
+
+active_weight_position_chart(pn, task::Task{<:Union{BaseTaskMap,TaskMapT}}, C::Chart) = true
 
 default_weight_metric(pn, wn, task::Task{<:TaskMap{M,ℝ{n},S}}, CN::Chart{1,ℝ{n}}) where {M,n,S} =
     SMatrix{n,n,eltype(pn)}(I)

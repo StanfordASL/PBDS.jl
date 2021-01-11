@@ -142,73 +142,74 @@ function task_components!(JftWJfm_sum, Am_sum, Bm_sum, JftWginvℱm_sum, Γm_sum
     m, n = dim(M), dim(N)
     task = node.data
     
-    Jf = task_jacobian_chart(xm, task, CM, CN)
     xn = task_map_chart(xm, task, CM, CN)
-    vn = Jf*vm
+    if active_weight_position_chart(xn, task, CN) || log_tasks
+        Jf = task_jacobian_chart(xm, task, CM, CN)
+        vn = Jf*vm
+        W = weight_metric_chart(xn, vn, task, CN)
 
-    if log_tasks
-        if node.coord_rep == ChartRep()
-            push!(node.traj_log.x, xn)
-            push!(node.traj_log.v, vn)
-        else
-            xne, vne = chart_to_emb_differential(xn, vn, CN)
-            push!(node.traj_log.x, xne)
-            push!(node.traj_log.v, vne)
-        end
-        push!(node.traj_log.chart, CN)
-    end
-
-    W = weight_metric_chart(xn, vn, task, CN)
-
-    if W != @SMatrix zeros(n,n)
-        JftW = Jf'*W
-        Jfdot = task_jacobian_chart_dot(xm, vm, task, CM, CN)
-        Γn = christoffel_symbols(xn, task, CN)
-        if any(isinf.(Γn)) || any(isnan.(Γn))
-            Γn = eltype(xm).(christoffel_symbols(BigFloat.(xn), task, CN))
-        end
-        g = metric_chart(xn, task, CN)
-        
-        ℱ_pot = potential_force_chart(xn, task, CN)
-        ℱ_dis = dissipative_forces_chart(xn, vn, task, CN)
-        ℱ = ℱ_pot + ℱ_dis
-        JftWJf = Jf'*W*Jf
-        JftWJfm_sum .+= JftWJf
-        Bm = JftWJf
-        Bm_sum .+= Bm
-
-        if ℱ != @SVector zeros(n)
-            JftWginvℱm = Jf'*W*inv(g)*ℱ
-            JftWginvℱm_sum .+= JftWginvℱm
-            log_tasks && push!(node.traj_log.JftWginvℱ, JftWginvℱm)
-        end
-        if Γn != @SArray zeros(n,n,n)
-            @tullio Γmnn[i,h,k] := Jf[l,i]*Γn[l,h,k]
-            @tullio Γmmn[l,s,k] := Jf[h,s]*Γmnn[l,h,k]
-            @tullio Γm[l,h,q] := JftW[q,k]*Γmmn[l,h,k]
-            Γm_sum .+= Γm
-            log_tasks && push!(node.traj_log.Γ, Γm)
-        end
-
-        Am = Jf'*W*Jfdot
-        Am_sum .+= Am
-        
         if log_tasks
-            push!(node.traj_log.g, g)
-            push!(node.traj_log.ginv, inv(g))
-            push!(node.traj_log.JftWJf, JftWJf)
-            push!(node.traj_log.A, Am)
-            push!(node.traj_log.B, Bm)
+            if node.coord_rep == ChartRep()
+                push!(node.traj_log.x, xn)
+                push!(node.traj_log.v, vn)
+            else
+                xne, vne = chart_to_emb_differential(xn, vn, CN)
+                push!(node.traj_log.x, xne)
+                push!(node.traj_log.v, vne)
+            end
+            push!(node.traj_log.chart, CN)
         end
 
-    elseif log_tasks
-        push!(node.traj_log.g, 0)
-        push!(node.traj_log.ginv, 0)
-        push!(node.traj_log.Γ, 0)
-        push!(node.traj_log.JftWJf, 0)
-        push!(node.traj_log.JftWginvℱ, 0)
-        push!(node.traj_log.A, 0)
-        push!(node.traj_log.B, 0)
+        if W != @SMatrix zeros(n,n)
+            JftW = Jf'*W
+            Jfdot = task_jacobian_chart_dot(xm, vm, task, CM, CN)
+            Γn = christoffel_symbols(xn, task, CN)
+            if any(isinf.(Γn)) || any(isnan.(Γn))
+                Γn = eltype(xm).(christoffel_symbols(BigFloat.(xn), task, CN))
+            end
+            g = metric_chart(xn, task, CN)
+            
+            ℱ_pot = potential_force_chart(xn, task, CN)
+            ℱ_dis = dissipative_forces_chart(xn, vn, task, CN)
+            ℱ = ℱ_pot + ℱ_dis
+            JftWJf = Jf'*W*Jf
+            JftWJfm_sum .+= JftWJf
+            Bm = JftWJf
+            Bm_sum .+= Bm
+
+            if ℱ != @SVector zeros(n)
+                JftWginvℱm = Jf'*W*inv(g)*ℱ
+                JftWginvℱm_sum .+= JftWginvℱm
+                log_tasks && push!(node.traj_log.JftWginvℱ, JftWginvℱm)
+            end
+            if Γn != @SArray zeros(n,n,n)
+                @tullio Γmnn[i,h,k] := Jf[l,i]*Γn[l,h,k]
+                @tullio Γmmn[l,s,k] := Jf[h,s]*Γmnn[l,h,k]
+                @tullio Γm[l,h,q] := JftW[q,k]*Γmmn[l,h,k]
+                Γm_sum .+= Γm
+                log_tasks && push!(node.traj_log.Γ, Γm)
+            end
+
+            Am = Jf'*W*Jfdot
+            Am_sum .+= Am
+            
+            if log_tasks
+                push!(node.traj_log.g, g)
+                push!(node.traj_log.ginv, inv(g))
+                push!(node.traj_log.JftWJf, JftWJf)
+                push!(node.traj_log.A, Am)
+                push!(node.traj_log.B, Bm)
+            end
+
+        elseif log_tasks
+            push!(node.traj_log.g, 0)
+            push!(node.traj_log.ginv, 0)
+            push!(node.traj_log.Γ, 0)
+            push!(node.traj_log.JftWJf, 0)
+            push!(node.traj_log.JftWginvℱ, 0)
+            push!(node.traj_log.A, 0)
+            push!(node.traj_log.B, 0)
+        end
     end
 
     nothing
