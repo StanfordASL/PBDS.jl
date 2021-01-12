@@ -1,7 +1,6 @@
 # PBDS.jl
 
 [![Build Status](https://travis-ci.com/StanfordASL/PBDS.jl.svg?branch=main)](https://travis-ci.com/StanfordASL/PBDS.jl)
-[![Coverage](https://codecov.io/gh/StanfordASL/PBDS.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/StanfordASL/PBDS.jl)
 
 Julia implementation of Pullback Bundle Dynamical Systems (PBDS) framework for geometrically-consistent, multi-task reactive control on non-Euclidean robot configuration manifolds and task manifolds.
 
