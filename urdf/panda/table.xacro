@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="panda">
+  <xacro:property name="in2m" value="0.0254"/>
+  <xacro:property name="ft2m" value="0.3048"/>
+  <xacro:property name="tablex" value="${9*ft2m}"/>
+  <xacro:property name="tabley" value="${12*ft2m}"/>
+  <xacro:property name="tablez" value="${1*ft2m}"/>
+  <xacro:property name="pandax" value="${19.5*in2m}"/>
+  <xacro:property name="panday" value="${-4.25*in2m}"/>
+  <xacro:property name="pandaz" value="${0*in2m}"/>
+  <xacro:property name="pandamountx" value="${1*ft2m}"/>
+  <xacro:property name="pandamounty" value="${1.2*ft2m}"/>
+  <xacro:property name="pandamountz" value="${0.3*ft2m}"/>
+  <xacro:property name="pandamountzoffset" value="${1*in2m}"/>
+  <link name="table">
+    <visual>
+      <origin xyz="${tablex/2} ${tabley/2} ${-tablez/2}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${tablex} ${tabley} ${tablez}"/>
+      </geometry>
+      <material name="grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="${pandax} ${-pandamounty/2} ${-pandamountz/2+pandamountzoffset}" rpy="0 0 0"/>
+      <geometry>
+        <box size="${pandamountx} ${pandamounty} ${pandamountz}"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0.15 0.15 0.15 1.0"/>
+      </material>
+    </visual>
+  </link>
+</robot>

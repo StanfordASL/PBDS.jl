@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="mug">
+  <xacro:macro name="mug" params="connected_to:='' rpy:='0 0 0' xyz:='0 0 0'">
+    <xacro:unless value="${connected_to == ''}">
+      <joint name="mug_joint" type="floating">
+        <parent link="${connected_to}"/>
+        <child link="mug"/>
+        <origin xyz="${xyz}" rpy="${rpy}"/>
+      </joint>
+    </xacro:unless>
+    <link name="mug">
+      <visual>
+        <geometry>
+          <mesh filename="package://franka_pbds_controllers/meshes/mug.dae"/>
+        </geometry>
+      </visual>
+    </link>
+    <link name="mug_rim_center"/>
+    <joint name="mug_rim_center_joint" type="fixed">
+      <parent link="mug"/>
+      <child link="mug_rim_center"/>
+      <origin xyz="0 0 0.105" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+</robot>

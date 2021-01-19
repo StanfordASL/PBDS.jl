@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <material name="redtran">
+    <color rgba=".9 .1 .1 0.3"/>
+  </material>
+   <material name="greentran">
+    <color rgba=".1 .9 .1 0.3"/>
+   </material>
+   <material name="bluetran">
+    <color rgba=".1 .1 .9 0.3"/>
+   </material>
+
+   <xacro:macro name="collision_sphere" params="radius:='0' xyz:='0 0 0' material:='redtran' ">
+    <collision>
+      <origin xyz="${xyz}"/>
+      <geometry> <sphere radius="${radius}"/> </geometry>
+      <material name="${material}"/>
+    </collision>
+   </xacro:macro>
+
+   <xacro:macro name="visual_sphere" params="radius:='0' xyz:='0 0 0' material:='redtran' ">
+    <visual>
+      <origin xyz="${xyz}"/>
+      <geometry> <sphere radius="${radius}"/> </geometry>
+      <material name="${material}"/>
+    </visual>
+   </xacro:macro>
+</robot>

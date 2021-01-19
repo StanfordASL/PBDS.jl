@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="panda">
+  <xacro:include filename="../collision_spheres.xacro"/>
+  <xacro:include filename="panda_arm.xacro"/>
+  <xacro:include filename="hand_fingers_fixed.xacro"/>
+  <xacro:panda_arm />
+  <xacro:hand_fingers_fixed ns="panda" rpy="0 0 ${-pi/4}" connected_to="panda_link8" q_fingers="0.02"/>
+  <xacro:include filename="../mug.xacro"/>
+  <xacro:mug connected_to="panda_link0"/>
+</robot>

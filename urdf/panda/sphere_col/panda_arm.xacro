@@ -1,0 +1,193 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="panda">
+  <xacro:macro name="panda_arm" params="arm_id:='panda' description_pkg:='franka_description' connected_to:='' xyz:='0 0 0' rpy:='0 0 0'">
+    <xacro:unless value="${not connected_to}">
+      <joint name="${arm_id}_joint_${connected_to}" type="fixed">
+        <parent link="${connected_to}"/>
+        <child link="${arm_id}_link0"/>
+        <origin rpy="${rpy}" xyz="${xyz}"/>
+      </joint>
+    </xacro:unless>
+    <link name="${arm_id}_link0">
+      <visual>
+        <geometry>
+          <mesh filename="package://${description_pkg}/meshes/visual/link0.dae"/>
+        </geometry>
+      </visual>
+      <xacro:collision_sphere radius=".06" xyz="0 0 .117" material="redtran"/>
+      <xacro:collision_sphere radius=".085" xyz="0 0 .042" material="redtran"/>
+      <xacro:collision_sphere radius=".075" xyz="-.029 0 .061" material="redtran"/>
+      <xacro:collision_sphere radius=".075" xyz="-.068 0 .024" material="redtran"/>
+    </link>
+    <link name="${arm_id}_link1">
+      <visual>
+        <geometry>
+          <mesh filename="package://${description_pkg}/meshes/visual/link1.dae"/>
+        </geometry>
+      </visual>
+      <xacro:collision_sphere radius="0.06" xyz="0 -.071 0" material="greentran"/>
+      <xacro:collision_sphere radius="0.061" xyz="0 -.024 0" material="greentran"/>
+      <xacro:collision_sphere radius="0.059" xyz="0 -.001 -.134" material="greentran"/>
+      <xacro:collision_sphere radius="0.06" xyz="0 0 -.17" material="greentran"/>
+      <xacro:collision_sphere radius="0.047" xyz=".015 -.048 -.032" material="greentran"/>
+      <xacro:collision_sphere radius="0.047" xyz="-.015 -.048 -.032" material="greentran"/>
+      <xacro:collision_sphere radius="0.047" xyz="0 -.054 -.047" material="greentran"/>
+      <xacro:collision_sphere radius="0.035" xyz=".026 -.035 -.069" material="greentran"/>
+      <xacro:collision_sphere radius="0.03" xyz=".036 -.011 -.103" material="greentran"/>
+      <xacro:collision_sphere radius="0.035" xyz="-.026 -.035 -.069" material="greentran"/>
+      <xacro:collision_sphere radius="0.03" xyz="-.036 -.011 -.103" material="greentran"/>
+      <xacro:collision_sphere radius="0.044" xyz=".011 -.028 -.093" material="greentran"/>
+      <xacro:collision_sphere radius="0.044" xyz="-.011 -.028 -.093" material="greentran"/>
+    </link>
+    <joint name="${arm_id}_joint1" type="revolute">
+      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+      <origin rpy="0 0 0" xyz="0 0 0.333"/>
+      <parent link="${arm_id}_link0"/>
+      <child link="${arm_id}_link1"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="87" lower="-2.8973" upper="2.8973" velocity="2.1750"/>
+    </joint>
+    <link name="${arm_id}_link2">
+      <visual>
+        <geometry>
+          <mesh filename="package://${description_pkg}/meshes/visual/link2.dae"/>
+        </geometry>
+      </visual>
+      <xacro:collision_sphere radius=".061" xyz="0 -.128 .001" material="redtran"/>
+      <xacro:collision_sphere radius=".061" xyz="0 0 .023" material="redtran"/>
+      <xacro:collision_sphere radius=".052" xyz="-.016 -.045 .051" material="redtran"/>
+      <xacro:collision_sphere radius=".043" xyz=".021 -.097 .032" material="redtran"/>
+      <xacro:collision_sphere radius=".061" xyz="0 0 .07" material="redtran"/>
+      <xacro:collision_sphere radius=".061" xyz="0 -.173 0" material="redtran"/>
+      <xacro:collision_sphere radius=".052" xyz=".016 -.045 .051" material="redtran"/>
+      <xacro:collision_sphere radius=".043" xyz="-.021 -.097 .032" material="redtran"/>
+    </link>
+    <joint name="${arm_id}_joint2" type="revolute">
+      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-1.7628" soft_upper_limit="1.7628"/>
+      <origin rpy="${-pi/2} 0 0" xyz="0 0 0"/>
+      <parent link="${arm_id}_link1"/>
+      <child link="${arm_id}_link2"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="87" lower="-1.7628" upper="1.7628" velocity="2.1750"/>
+    </joint>
+    <link name="${arm_id}_link3">
+      <visual>
+        <geometry>
+          <mesh filename="package://${description_pkg}/meshes/visual/link3.dae"/>
+        </geometry>
+      </visual>
+      <xacro:collision_sphere radius=".059" xyz=".045 .026 -.032" material="greentran"/>
+      <xacro:collision_sphere radius=".06" xyz=".084 .017 -.001" material="greentran"/>
+      <xacro:collision_sphere radius=".059" xyz=".081 .062 0" material="greentran"/>
+      <xacro:collision_sphere radius=".06" xyz="0 .001 -.105" material="greentran"/>
+      <xacro:collision_sphere radius=".059" xyz=".002 0 -.069" material="greentran"/>
+    </link>
+    <joint name="${arm_id}_joint3" type="revolute">
+      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+      <origin rpy="${pi/2} 0 0" xyz="0 -0.316 0"/>
+      <parent link="${arm_id}_link2"/>
+      <child link="${arm_id}_link3"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="87" lower="-2.8973" upper="2.8973" velocity="2.1750"/>
+    </joint>
+    <link name="${arm_id}_link4">
+      <visual>
+        <geometry>
+          <mesh filename="package://${description_pkg}/meshes/visual/link4.dae"/>
+        </geometry>
+      </visual>
+      <xacro:collision_sphere radius=".057" xyz="0 0 .062" material="redtran"/>
+      <xacro:collision_sphere radius=".059" xyz="0 0 .018" material="redtran"/>
+      <xacro:collision_sphere radius=".058" xyz="-.022 .019 .04" material="redtran"/>
+      <xacro:collision_sphere radius=".058" xyz="-.082 .111 0" material="redtran"/>
+      <xacro:collision_sphere radius=".059" xyz="-.084 .069 0" material="redtran"/>
+      <xacro:collision_sphere radius=".059" xyz="-.071 .057 .002" material="redtran"/>
+    </link>
+    <joint name="${arm_id}_joint4" type="revolute">
+      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.0718" soft_upper_limit="-0.0698"/>
+      <origin rpy="${pi/2} 0 0" xyz="0.0825 0 0"/>
+      <parent link="${arm_id}_link3"/>
+      <child link="${arm_id}_link4"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="87" lower="-3.0718" upper="-0.0698" velocity="2.1750"/>
+    </joint>
+    <link name="${arm_id}_link5">
+      <visual>
+        <geometry>
+          <mesh filename="package://${description_pkg}/meshes/visual/link5.dae"/>
+        </geometry>
+      </visual>
+      <xacro:collision_sphere radius=".053" xyz="0 .021 -.197" material="greentran"/>
+      <xacro:collision_sphere radius=".03" xyz="-.018 .096 -.036" material="greentran"/>
+      <xacro:collision_sphere radius=".055" xyz="0 .085 0" material="greentran"/>
+      <xacro:collision_sphere radius=".03" xyz=".018 .096 -.036" material="greentran"/>
+      <xacro:collision_sphere radius=".053" xyz="0 .037 0" material="greentran"/>
+      <xacro:collision_sphere radius=".062" xyz="0 .001 -.233" material="greentran"/>
+      <xacro:collision_sphere radius=".043" xyz="0 .059 -.178" material="greentran"/>
+      <xacro:collision_sphere radius=".027" xyz=".015 .077 -.147" material="greentran"/>
+      <xacro:collision_sphere radius=".027" xyz="-.015 .091 -.076" material="greentran"/>
+      <xacro:collision_sphere radius=".024" xyz="0 .094 -.053" material="greentran"/>
+      <xacro:collision_sphere radius=".027" xyz=".015 .087 -.112" material="greentran"/>
+      <xacro:collision_sphere radius=".027" xyz="-.015 .087 -.112" material="greentran"/>
+      <xacro:collision_sphere radius=".027" xyz=".015 .091 -.076" material="greentran"/>
+      <xacro:collision_sphere radius=".027" xyz="-.015 .077 -.147" material="greentran"/>
+      <xacro:collision_sphere radius=".024" xyz="0 .081 -.132" material="greentran"/>
+      <xacro:collision_sphere radius=".022" xyz="0 .087 -.092" material="greentran"/>
+    </link>
+    <joint name="${arm_id}_joint5" type="revolute">
+      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+      <origin rpy="${-pi/2} 0 0" xyz="-0.0825 0.384 0"/>
+      <parent link="${arm_id}_link4"/>
+      <child link="${arm_id}_link5"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
+    </joint>
+    <link name="${arm_id}_link6">
+      <visual>
+        <geometry>
+          <mesh filename="package://${description_pkg}/meshes/visual/link6.dae"/>
+        </geometry>
+      </visual>
+      <xacro:collision_sphere radius=".05" xyz=".087 -.03 .0" material="redtran"/>
+      <xacro:collision_sphere radius=".059" xyz=".028 .011 .009" material="redtran"/>
+      <xacro:collision_sphere radius=".055" xyz="-.001 0 .012" material="redtran"/>
+      <xacro:collision_sphere radius=".052" xyz=".079 .04 0" material="redtran"/>
+      <xacro:collision_sphere radius=".049" xyz=".09 .01 .0" material="redtran"/>
+    </link>
+    <joint name="${arm_id}_joint6" type="revolute">
+      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-0.0175" soft_upper_limit="3.7525"/>
+      <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
+      <parent link="${arm_id}_link5"/>
+      <child link="${arm_id}_link6"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="12" lower="-0.0175" upper="3.7525" velocity="2.6100"/>
+    </joint>
+    <link name="${arm_id}_link7">
+      <visual>
+        <geometry>
+          <mesh filename="package://${description_pkg}/meshes/visual/link7.dae"/>
+        </geometry>
+      </visual>
+      <xacro:collision_sphere radius=".05" xyz=".0 .0 .075" material="greentran"/>
+      <xacro:collision_sphere radius=".028" xyz=".016 .042 .079" material="greentran"/>
+      <xacro:collision_sphere radius=".028" xyz=".041 .012 .079" material="greentran"/>
+      <xacro:collision_sphere radius=".026" xyz=".04 .058 .085" material="greentran"/>
+      <xacro:collision_sphere radius=".026" xyz=".058 .037 .083" material="greentran"/>
+    </link>
+    <joint name="${arm_id}_joint7" type="revolute">
+      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+      <origin rpy="${pi/2} 0 0" xyz="0.088 0 0"/>
+      <parent link="${arm_id}_link6"/>
+      <child link="${arm_id}_link7"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
+    </joint>
+    <link name="${arm_id}_link8"/>
+    <joint name="${arm_id}_joint8" type="fixed">
+      <origin rpy="0 0 0" xyz="0 0 0.107"/>
+      <parent link="${arm_id}_link7"/>
+      <child link="${arm_id}_link8"/>
+      <axis xyz="0 0 0"/>
+    </joint>
+  </xacro:macro>
+</robot>
