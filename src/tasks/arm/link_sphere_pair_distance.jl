@@ -123,9 +123,9 @@ end
 
 function stacked_position_distance_jacobian_dot(xs, xs_dot)
     m, n = 6, 1
-    ∇xf = ForwardDiff.jacobian(xs -> SVector{6, eltype(xs)}(
-        stacked_position_distance_jacobian(xs)), xs)::SArray{Tuple{m,m},eltype(xs),2,m*m}
-    Jfdot = SMatrix{n,m,eltype(xs)}(reshape(∇xf*xs_dot, n, m))::SArray{Tuple{n,m},eltype(xs),2,m*n}
+    ∇xf = ForwardDiff.jacobian(xs -> stacked_position_distance_jacobian(xs),
+        xs)::SArray{Tuple{m,m},eltype(xs),2,m*m}
+    Jfdot = reshape(∇xf*xs_dot, Size(n,m))
 end
 
 # Distances between spheres, with positions input as a single stacked vector 
@@ -140,10 +140,9 @@ end
 
 function stacked_position_sphere_distance_jacobian_dot(xs, xs_dot, radius1, radius2)
     m, n = 6, 1
-    ∇xf = ForwardDiff.jacobian(xs -> SVector{6, eltype(xs)}(
-        stacked_position_sphere_distance_jacobian(xs, radius1, radius2)),
-        xs)::SArray{Tuple{m,m},eltype(xs),2,m*m}
-    Jfdot = SMatrix{n,m,eltype(xs)}(reshape(∇xf*xs_dot, n, m))::SArray{Tuple{n,m},eltype(xs),2,m*n}
+    ∇xf = ForwardDiff.jacobian(xs -> stacked_position_sphere_distance_jacobian(xs, radius1,
+        radius2), xs)::SArray{Tuple{m,m},eltype(xs),2,m*m}
+    Jfdot = reshape(∇xf*xs_dot, Size(n,m))
 end
 
 
@@ -183,7 +182,7 @@ function task_jacobian_emb_dot2(xme, vme, task_map::LinkSpherePairDistance{ℝ{m
     ∇xf = ForwardDiff.jacobian(xme -> SVector{m*n,eltype(xme)}(
         reshape(task_jacobian_emb_for_jdot(xme, task_map), m*n)),
         xme)::SArray{Tuple{m*n,m},eltype(xme),2,m*m*n}
-    Jfdot_emb = SMatrix{n,m,eltype(xme)}(reshape(∇xf*vme, n, m))
+    Jfdot_emb = reshape(∇xf*vme, Size(n,m))
 end
 
 task_jacobian_chart_dot(xm, vm, task_map::LinkSpherePairDistance{ℝ{n},R1,S,JC},

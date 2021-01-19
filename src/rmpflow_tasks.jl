@@ -1,13 +1,13 @@
 function metric_curvature(xn, vn, task::TaskGDS{<:TaskMapT{M,N,S}}, C::Chart{I,N}) where {M,N,I,S}
     n = dim(N)
-    ∂g_∂v = ForwardDiff.jacobian(vn -> reshape(metric_chart(xn, vn, task, C), n^2), vn)
+    ∂g_∂v = ForwardDiff.jacobian(vn -> reshape(metric_chart(xn, vn, task, C), Size(n^2)), vn)
     Ξ = SMatrix{n,n,eltype(xn)}(0.5*sum(∂g_∂v[(i-1)*n+1:i*n,:].*vn[i] for i in 1:n)')
 end
 
 function force_curvature(xn, vn, task::TaskGDS{<:TaskMapT{M,N,S}}, C::Chart{I,N}) where {M,N,I,S}
     n = dim(N)
     ∂g_∂x = SMatrix{n^2,n,eltype(xn)}(ForwardDiff.jacobian(xn -> reshape(metric_chart(xn, vn, task, C), n^2), xn))
-    ξ1 = SVector{n, eltype(xn)}(reshape(∂g_∂x*vn, n, n)*vn)
+    ξ1 = reshape(∂g_∂x*vn, Size(n,n))*vn
     ξ2 = ForwardDiff.gradient(xn -> (vn'*metric_chart(xn, vn, task, C)*vn)[1], xn)
     ξ = ξ1 - 0.5*ξ2
 end

@@ -31,8 +31,8 @@ function permuted_christoffel_symbols(pn_perm, task::Task{<:TaskMapT{M,N,S}},
     n = dim(T{N})
     Ginv = inv(permuted_metric_chart(pn_perm, task, C))
     ∂G_∂xn_matrix = ForwardDiff.jacobian(
-        pn_perm -> reshape(permuted_metric_chart(pn_perm, task, C), n^2), pn_perm)
-    ∂G_∂xn = SArray{Tuple{n,n,n},S}(reshape(∂G_∂xn_matrix, n, n, n))
+        pn_perm -> reshape(permuted_metric_chart(pn_perm, task, C), Size(n^2)), pn_perm)
+    ∂G_∂xn = SArray{Tuple{n,n,n},S}(reshape(∂G_∂xn_matrix, Size(n,n,n)))
     inds = static(1):static(n)
     Γ = SArray{Tuple{n,n,n},S}([0.5*sum(Tuple(Ginv[k,l]*(∂G_∂xn[j,l,i]+∂G_∂xn[i,l,j]-∂G_∂xn[i,j,l])
         for l in inds)) for i in inds, j in inds, k in inds])

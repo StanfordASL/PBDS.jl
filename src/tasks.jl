@@ -301,14 +301,14 @@ function task_jacobian_emb_dot(xme, vme, task_map::BaseTaskMap, arg...)
     m, n = embdim(domain_manifold(task_map)), embdim(codomain_manifold(task_map))
     ∇xf = ForwardDiff.jacobian(xme -> SVector{m*n,eltype(xme)}(reshape(task_jacobian_emb(xme,
         task_map, arg...), m*n)), xme)::SArray{Tuple{m*n,m},eltype(xme),2,m*m*n}
-    Jfdot_emb = SMatrix{n,m,eltype(xme)}(reshape(∇xf*vme, n, m))
+    Jfdot_emb = reshape(∇xf*vme, Size(n,m))
 end
 
 function task_jacobian_chart_dot(xm, vm, task_map::BaseTaskMap, arg...)
     m, n = dim(domain_manifold(task_map)), dim(codomain_manifold(task_map))
     ∇xf = ForwardDiff.jacobian(xm -> SVector{m*n,eltype(xm)}(reshape(task_jacobian_chart(xm,
         task_map, arg...), m*n)), xm)::SArray{Tuple{m*n,m},eltype(xm),2,m*m*n}
-    Jfdot = SMatrix{n,m,eltype(xm)}(reshape(∇xf*vm, n, m))
+    Jfdot = reshape(∇xf*vm, Size(n,m))
 end
 
 # Default coordinate representations for tasks on Rn

@@ -34,9 +34,9 @@ end
 
 function point_world_position_jacobian_dot(Rt, Rt_dot, point_frame_position)
     m, n = 12, 3
-    ∇xf = ForwardDiff.jacobian(Rt -> reshape(
-        point_world_position_jacobian(Rt, point_frame_position), m*n), Rt)
-    Jfdot = SMatrix{n,m,eltype(Rt)}(reshape(∇xf*Rt_dot, n, m))::SArray{Tuple{n,m},eltype(Rt),2,m*n}
+    ∇xf = SMatrix{n*m,m,eltype(Rt)}(ForwardDiff.jacobian(Rt -> reshape(
+        point_world_position_jacobian(Rt, point_frame_position), m*n), Rt))
+    Jfdot = reshape(∇xf*Rt_dot, Size(n,m))
 end
 
 @inline function update_point_world_position_jacobian!(world_position_jacobian::CacheElement, Rt,
