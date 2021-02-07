@@ -3,29 +3,39 @@ function single_task_components(xm, vm, task::Task{<:BaseTaskMap}, CM::Chart{I,M
     m, n = dim(M), dim(N)
     
     σ, σdot = xm, vm
-    Jf = task_jacobian_chart(σ, task, CM, CN)
-    Jfdot = task_jacobian_chart_dot(σ, σdot, task, CM, CN)
     xn = task_map_chart(σ, task, CM, CN)
-    vn = Jf*vm
-    
-    Γ = christoffel_symbols(xn, task, CN)
-    if any(isinf.(Γ)) || any(isnan.(Γ))
-        Γ = eltype(xm).(christoffel_symbols(BigFloat.(xn), task, CN))
+    if active_weight_position_chart(xn, task, CN)
+        Jf = task_jacobian_chart(σ, task, CM, CN)
+        vn = Jf*vm
+        W = weight_metric_chart(xn, vn, task, CN)
+        if W != @SMatrix zeros(n,n)
+            Jfdot = task_jacobian_chart_dot(σ, σdot, task, CM, CN)
+        
+            Γ = christoffel_symbols(xn, task, CN)
+            if any(isinf.(Γ)) || any(isnan.(Γ))
+                Γ = eltype(xm).(christoffel_symbols(BigFloat.(xn), task, CN))
+            end
+            g = metric_chart(xn, task, CN)
+            ginv = inv(g)
+
+            ℱ_pot = potential_force_chart(xn, task, CN)
+            ℱ_dis = dissipative_forces_chart(xn, vn, task, CN)
+            ℱ = ℱ_pot + ℱ_dis
+            
+            m_inds, n_inds = static(1):static(m), static(1):static(n)
+            Ξ = SMatrix{n,m,eltype(xm)}([sum(Tuple(Jf[l,j]*Γ[l,h,k]*Jf[h,r]*σdot[r]
+                for l=n_inds, h=n_inds, r=m_inds)) for k=n_inds, j=m_inds])
+            
+            JftWJf = Jf'*W*Jf
+            JftWA = Jf'*W*(ginv*ℱ - (Jfdot + Ξ)*σdot)
+        else
+            JftWJf = @SMatrix zeros(m,m)
+            JftWA = @SVector zeros(m)
+        end
+    else
+        JftWJf = @SMatrix zeros(m,m)
+        JftWA = @SVector zeros(m)
     end
-    g = metric_chart(xn, task, CN)
-    ginv = inv(g)
-
-    ℱ_pot = potential_force_chart(xn, task, CN)
-    ℱ_dis = dissipative_forces_chart(xn, vn, task, CN)
-    ℱ = ℱ_pot + ℱ_dis
-    
-    m_inds, n_inds = static(1):static(m), static(1):static(n)
-    Ξ = SMatrix{n,m,eltype(xm)}([sum(Tuple(Jf[l,j]*Γ[l,h,k]*Jf[h,r]*σdot[r]
-        for l=n_inds, h=n_inds, r=m_inds)) for k=n_inds, j=m_inds])
-    W = weight_metric_chart(xn, vn, task, CN)
-
-    JftWJf = Jf'*W*Jf
-    JftWA = Jf'*W*(ginv*ℱ - (Jfdot + Ξ)*σdot)
 
     JftWJf, JftWA
 end
