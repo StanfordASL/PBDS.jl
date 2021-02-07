@@ -14,14 +14,14 @@ function metric_chart_transition(p1, G1, C1::Chart{I,M}, C2::Chart{J,M}) where {
 end
 
 function metric_from_home_chart(pni, task::Task{<:TaskMapT}, Ci)
-    Ch = home_task_chart(task)
+    Ch = home_task_chart(task, Ci)
     pnh = chart_transition(pni, T(Ci), T(Ch))
     Gh = metric_chart(pnh, task, Ch)
     Gi = metric_chart_transition(pnh, Gh, T(Ch), T(Ci))
 end
 
 function metric_from_home_chart(pni, task::Task{<:BaseTaskMap}, Ci)
-    Ch = home_task_chart(task)
+    Ch = home_task_chart(task, Ci)
     pnh = chart_transition(pni, Ci, Ch)
     Gh = metric_chart(pnh, task, Ch)
     Gi = metric_chart_transition(pnh, Gh, Ch, Ci)
@@ -52,7 +52,7 @@ default_metric(pne, task::Task{<:TaskMap{M,𝕊{n},S}}) where {M,n,S} =
 weight_metric_coord_rep(task::Task{<:Union{BaseTaskMap,TaskMapT}}) = default_coord_rep(task)
 
 function weight_metric_from_home_chart(pni, wni, task::Task{<:BaseTaskMap}, Ci)
-    Ch = home_task_chart(task)
+    Ch = home_task_chart(task, Ci)
     pnh, wnh = chart_transition_differential(pni, wni, Ci, Ch)
     Wh = weight_metric_chart(pnh, wnh, task, Ch)
     Wi = metric_chart_transition(pnh, Wh, Ch, Ci)
@@ -73,7 +73,7 @@ weight_metric_chart(::ChartRep, pn, wn, task, C) =
 weight_metric_emb(pne, wne, task) = throw("Not defined!")
 
 # function active_weight_position_from_home_chart(pn, task::Task{<:BaseTaskMap}, C)
-#     Ch = home_task_chart(task)
+#     Ch = home_task_chart(task, C)
 #     pnh = chart_transition(pni, Ci, Ch)
 #     active_weight_position_chart(pnh, task, Ch)
 # end
@@ -103,7 +103,7 @@ default_weight_metric(pne, vne, task::Task{<:TaskMap{M,𝕊{n},S}}) where {M,n,S
 
 ## GDS metrics
 function metric_from_home_chart(xni, vni, task, Ci::Chart{I,N}) where {N,I}
-    Ch = home_task_chart(task)
+    Ch = home_task_chart(task, Ci)
     xnh, vnh = chart_transition_differential(xni, vni, Ci, Ch)
     Gh = metric_chart(xnh, vnh, task, Ch)
     
