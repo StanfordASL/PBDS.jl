@@ -33,6 +33,13 @@ function emb_to_chart(xe, C::Chart{I,M}) where {M<:PM,I}
     x = [x1; x2]
 end
 
+function chart_to_emb(x, C::Chart{I,M}) where {M<:PM,I}
+    C1, C2 = product_chart_split(C)
+    x1, x2 = product_manifold_chart_splitview(x, M)
+    x1e, x2e = chart_to_emb(x1, C1), chart_to_emb(x2, C2)
+    xe = [x1e; x2e]
+end
+
 function chart_transition(xa, Ca::Chart{Tuple{Ia,Ja},M},
         Cb::Chart{Tuple{Ib,Jb},M}) where {M<:PM,Ia,Ja,Ib,Jb}
     C1a, C2a = product_chart_split(Ca)
