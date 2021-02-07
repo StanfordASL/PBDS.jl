@@ -28,9 +28,10 @@ function task_map_emb_chart(::EmbRep, ::ChartRep, xme,
 end
 
 # S2
-PBDS.codomain_coord_rep(::AngularPositionAroundPoint{R3,S2,S}) where S = EmbRep()
+codomain_coord_rep(::AngularPositionAroundPoint{R3,S2,S}) where S = EmbRep()
 
-function PBDS.task_map_emb(::EmbRep, ::EmbRep, xme,
+function task_map_emb(::EmbRep, ::EmbRep, xme,
         task_map::AngularPositionAroundPoint{R3,S2,S}) where S
-    xme
+    Δx = xme - task_map.position_center
+    Δx/norm(Δx)
 end
