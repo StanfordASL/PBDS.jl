@@ -16,8 +16,13 @@ codomain_coord_rep(::AngularPositionAroundPoint{R2,S1,S}) where S = ChartRep()
 function task_map_emb_chart(::EmbRep, ::ChartRep, xme,
         task_map::AngularPositionAroundPoint{R2,S1,S}, ::Chart{Angleπ,S1}) where S
     a = xme - task_map.position_center
-    â = a ./ norm(a)
-    SA[atan(â[2], â[1])]
+    d = norm(a)
+    if d == 0
+        return SA[0.]
+    else
+        â = a ./ norm(a)
+        return SA[atan(â[2], â[1])]
+    end
 end
 
 function task_map_emb_chart(::EmbRep, ::ChartRep, xme,
@@ -33,5 +38,10 @@ codomain_coord_rep(::AngularPositionAroundPoint{R3,S2,S}) where S = EmbRep()
 function task_map_emb(::EmbRep, ::EmbRep, xme,
         task_map::AngularPositionAroundPoint{R3,S2,S}) where S
     Δx = xme - task_map.position_center
-    Δx/norm(Δx)
+    d = norm(Δx)
+    if d == 0
+        return @SVector zeros(3)
+    else
+        return Δx/norm(Δx)
+    end
 end

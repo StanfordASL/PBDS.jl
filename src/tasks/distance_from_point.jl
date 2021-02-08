@@ -9,8 +9,10 @@ end
 DistanceFromPointT{M,R1}(c::SVector{m,S}) where {M,R1,S,m} =
     DistanceFromPointT{M,R1,S,m}(DistanceFromPoint{M,R1}(c))
 
-task_map_emb(::EmbRep, ::EmbRep, xme, task_map::DistanceFromPoint{ℝ{m},R1}) where m =
-    SA[norm(xme - task_map.position_center)]
+function task_map_emb(::EmbRep, ::EmbRep, xme, task_map::DistanceFromPoint{ℝ{m},R1}) where m
+    d = norm(xme - task_map.position_center)
+    d == 0 ? SA[0.] : SA[d]
+end
 
 # Updateable version
 struct DistanceFromPointDynamic{M,R1,S,m} <: TaskMap{M,R1,S}
