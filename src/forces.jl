@@ -77,7 +77,7 @@ dissipative_term_chart(::ChartRep, xn, vn, task, C) =
     dissipative_term_from_home_chart(xn, vn, task, C)
 dissipative_term_emb(xne, vne, task) = throw("Not defined!")
 
-default_dissipative_term_emb(xn, vn, task::TaskGDS{<:TaskMapT{M,N,S}}, C) where {M,N,S} =    
+default_dissipative_term_emb(xn, vn, task::TaskGDS{<:TaskMapT{M,N}}, C) where {M,N} =    
     @SMatrix zeros(eltype(xn), embdim(N), embdim(N))
-default_dissipative_term_chart(xn, vn, task::TaskGDS{<:TaskMapT{M,N,S}}, C) where {M,N,S} =    
+default_dissipative_term_chart(xn, vn, task::TaskGDS{<:TaskMapT{M,N}}, C) where {M,N} =    
     @SMatrix zeros(eltype(xn), dim(N), dim(N))

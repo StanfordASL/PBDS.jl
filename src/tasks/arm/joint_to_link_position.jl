@@ -8,8 +8,7 @@ end
 JointToLinkPosition{ℝ{n},R3}(s::StateCache{S,JC}, l::RigidBody{S}) where {n,R3,S,JC} = 
     JointToLinkPosition{ℝ{n},R3,S,JC}(s,l)
 
-function task_map_emb(::EmbRep, ::EmbRep, xme,
-        task_map::JointToLinkPosition{ℝ{n},R3,S,JC}) where {n,S,JC}
+function task_map_emb(::EmbRep, ::EmbRep, xme, task_map::JointToLinkPosition{ℝ{n},R3}) where n
     state = task_map.state_cache[eltype(xme)]
     set_configuration!(state, xme)
     translation(transform_to_root(state, task_map.link))

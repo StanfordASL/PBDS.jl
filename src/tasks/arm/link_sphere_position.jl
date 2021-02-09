@@ -10,25 +10,24 @@ end
 LinkSpherePosition{R12,R3}(point_cache::FramePointCache{n,S}) where {n,S} =
     LinkSpherePosition{R12,R3,S,n}(point_cache)
 
-task_map_emb(::EmbRep, ::EmbRep, xme, task_map::LinkSpherePosition{R12,R3,S}) where {n,S} =
+task_map_emb(::EmbRep, ::EmbRep, xme, task_map::LinkSpherePosition{R12,R3}) =
     point_world_position(xme, task_map.point_cache.point.v)
 
-function task_jacobian_emb(xme, task_map::LinkSpherePosition{R12,R3,S}, arg...) where {n,S}
+function task_jacobian_emb(xme, task_map::LinkSpherePosition{R12,R3}, arg...)
     Jfc = task_map.point_cache.world_position_jacobian
     point_frame_position = task_map.point_cache.point.v
     update_point_world_position_jacobian!(Jfc, xme, point_frame_position)
     Jf = Jfc.data[1]
 end
 
-task_jacobian_chart(xm, task_map::LinkSpherePosition{R12,R3,S},
-    CM::Chart{1,R12}, CN::Chart{1,R3}) where S = task_jacobian_emb(xm, task_map)
+task_jacobian_chart(xm, task_map::LinkSpherePosition{R12,R3}, CM::Chart{1,R12}, CN::Chart{1,R3}) = 
+    task_jacobian_emb(xm, task_map)
 
-function task_jacobian_emb_dot(xme, vme, task_map::LinkSpherePosition{R12,R3,S},
-        arg...) where {n,S}
+function task_jacobian_emb_dot(xme, vme, task_map::LinkSpherePosition{R12,R3}, arg...)
     Jfc_dot = task_map.point_cache.world_position_jacobian_dot
     point_frame_position = task_map.point_cache.point.v
     update_point_world_position_jacobian_dot!(Jfc_dot, xme, vme, point_frame_position)
     Jf_dot = Jfc_dot.data[1]
 end
-task_jacobian_chart_dot(xm, vm, task_map::LinkSpherePosition{R12,R3,S},
-    CM::Chart{1,R12}, CN::Chart{1,R3}) where S = task_jacobian_emb_dot(xm, vm, task_map)
+task_jacobian_chart_dot(xm, vm, task_map::LinkSpherePosition{R12,R3},
+    CM::Chart{1,R12}, CN::Chart{1,R3}) = task_jacobian_emb_dot(xm, vm, task_map)

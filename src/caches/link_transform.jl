@@ -8,7 +8,7 @@ if !(@isdefined LinkFrameCache)
     end
 end
 
-function LinkFrameCache(link, state::MechanismState{X,M,C,JC}) where {X,M,C,JC}
+function LinkFrameCache(link, state::MechanismState{X}) where X
     n = num_positions(state)
     link_path = path(state.mechanism, root_body(state.mechanism), link)
     transform_jacobian = CacheElement([@SMatrix zeros(12,n)])

@@ -95,9 +95,9 @@ function chart_to_emb(p, C::Chart{I,T{M}}) where {M,I}
 end
 
 emb_to_chart_jacobian(pe, C::Chart{I,M}) where {M,I} =
-    ForwardDiff.jacobian(pe -> emb_to_chart(pe, Chart{I,M}()), pe)
+    ForwardDiff.jacobian(pe -> emb_to_chart(pe, C), pe)
 chart_to_emb_jacobian(pe, C::Chart{I,M}) where {M,I} =
-    ForwardDiff.jacobian(pe -> chart_to_emb(pe, Chart{I,M}()), pe)
+    ForwardDiff.jacobian(pe -> chart_to_emb(pe, C), pe)
 chart_transition_jacobian(p1, C1::Chart{I,M}, C2::Chart{J,M}) where {M,I,J} = 
     ForwardDiff.jacobian(p1 -> chart_transition(p1, C1, C2), p1)
 
@@ -138,7 +138,8 @@ function global_frame_coeffs_chart_transition(p1, B1, C1::Chart{I,M}, C2::Chart{
     B2 = B1*∂p2_∂p1'
 end
 
-function global_coframe_coeffs_chart_transition(p1, β1, C1::Chart{I,M}, C2::Chart{J,M}) where {M,I,J}
+function global_coframe_coeffs_chart_transition(p1, β1, C1::Chart{I,M},
+        C2::Chart{J,M}) where {M,I,J}
     ∂p2_∂p1 = chart_transition_jacobian(p1, C1, C2)
     β2 = inv(∂p2_∂p1)'*β1
 end

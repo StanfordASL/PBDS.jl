@@ -1,10 +1,10 @@
-function apply_task_metric_chart(pn, vn, wn, task::Task{<:TaskMap{M,N,S}},
-        C::Chart{I,N}) where {M,N,S,I}
+function apply_task_metric_chart(pn, vn, wn, task::Task{<:TaskMap{M,N}},
+        C::Chart{I,N}) where {M,N,I}
     G = metric_chart(pn, task, C)
     vn'*G*wn
 end
 
-task_riemannian_norm_chart(pn, vn, task::Task{<:TaskMap{M,N,S}}, C::Chart{I,N}) where {M,N,S,I} =
+task_riemannian_norm_chart(pn, vn, task::Task{<:TaskMap{M,N}}, C::Chart{I,N}) where {M,N,I} =
     sqrt(apply_task_metric(pn, vn, vn, task, C))
 
 function metric_chart_transition(p1, G1, C1::Chart{I,M}, C2::Chart{J,M}) where {M,I,J}
@@ -41,11 +41,11 @@ metric_chart(::EmbRep, pni, task, Ci) = metric_from_emb(pni, task, Ci)
 metric_chart(::ChartRep, pni, task, Ci) = metric_from_home_chart(pni, task, Ci)
 metric_emb(pne, task) = throw("Not defined!")
 
-default_metric(pni, task::Task{<:TaskMap{M,ℝ{n},S}}, CN1::Chart{1,ℝ{n}}) where {M,n,S} =
+default_metric(pni, task::Task{<:TaskMap{M,ℝ{n}}}, CN1::Chart{1,ℝ{n}}) where {M,n} =
     SMatrix{n,n,eltype(pni)}(I)
-default_metric(pni, task::Task{<:TaskMap{M,S1,S}}, CN1::Chart{<:AngleChart,S1}) where {M,S} =
+default_metric(pni, task::Task{<:TaskMap{M,S1}}, CN1::Chart{<:AngleChart,S1}) where M =
     SMatrix{1,1,eltype(pni)}(I)
-default_metric(pne, task::Task{<:TaskMap{M,𝕊{n},S}}) where {M,n,S} =
+default_metric(pne, task::Task{<:TaskMap{M,𝕊{n}}}) where {M,n} =
     SMatrix{n+1,n+1,eltype(pne)}(I)
 
 ## Weight metrics
@@ -92,13 +92,11 @@ weight_metric_emb(pne, wne, task) = throw("Not defined!")
 
 active_weight_position_chart(pn, task::Task{<:Union{BaseTaskMap,TaskMapT}}, C::Chart) = true
 
-default_weight_metric(pn, wn, task::Task{<:TaskMap{M,ℝ{n},S}}, CN::Chart{1,ℝ{n}}) where {M,n,S} =
+default_weight_metric(pn, wn, task::Task{<:TaskMap{M,ℝ{n}}}, CN::Chart{1,ℝ{n}}) where {M,n} =
     SMatrix{n,n,eltype(pn)}(I)
-function default_weight_metric(pn, wn, task::Task{<:TaskMap{M,S1,S}},
-        CN::Chart{<:AngleChart,S1}) where {M,S}
+default_weight_metric(pn, wn, task::Task{<:TaskMap{M,S1}}, CN::Chart{<:AngleChart,S1}) where M =
     SMatrix{1,1,eltype(pn)}(I)
-end
-default_weight_metric(pne, vne, task::Task{<:TaskMap{M,𝕊{n},S}}) where {M,n,S} =
+default_weight_metric(pne, vne, task::Task{<:TaskMap{M,𝕊{n}}}) where {M,n} =
     SMatrix{n+1,n+1,eltype(pne)}(I)
 
 ## GDS metrics
@@ -142,5 +140,5 @@ metric_chart(::EmbRep, xni, vni, task, Ci) = metric_from_emb(xni, vni, task, Ci)
 metric_chart(::ChartRep, xni, vni, task, Ci) = metric_from_home_chart(xni, vni, task, Ci)
 metric_emb(xne, vne, task) = throw("Not defined!")
 
-default_metric(xn, vn, task::TaskGDS{<:TaskMapT{M,ℝ{n},S}}, CN::Chart{1,ℝ{n}}) where {M,n,S} =
+default_metric(xn, vn, task::TaskGDS{<:TaskMapT{M,ℝ{n}}}, CN::Chart{1,ℝ{n}}) where {M,n} =
     SMatrix{n,n,eltype(xn)}(I)

@@ -111,8 +111,8 @@ end
 task_map_emb(::ChartRep, ::ChartRep, pme, task_map, C) =
     throw(ArgumentError("Second chart not specified"))
 
-function task_map_emb_chart(::EmbRep, ::EmbRep, pme, task_map::TaskMap{M,N,S},
-        CN::Chart{J,N}) where {M,N,S,J}
+function task_map_emb_chart(::EmbRep, ::EmbRep, pme, task_map::TaskMap{M,N},
+        CN::Chart{J,N}) where {M,N,J}
     pne = task_map_emb(pme, task_map)
     pn = emb_to_chart(pne, CN)
 end
@@ -123,8 +123,8 @@ task_map_emb_chart(::ChartRep, ::EmbRep, pme, task_map, C) =
 task_map_emb_chart(::ChartRep, ::ChartRep, pme, task_map, C) =
     throw(ArgumentError("Second chart not specified"))
 
-function task_map_chart_emb(::EmbRep, ::EmbRep, pm, task_map::TaskMap{M,N,S},
-        CM::Chart{I,M}) where {M,N,S,I}
+function task_map_chart_emb(::EmbRep, ::EmbRep, pm, task_map::TaskMap{M,N},
+        CM::Chart{I,M}) where {M,N,I}
     pme = chart_to_emb(pm, CM)
     pne = task_map_emb(pme, task_map)
 end
@@ -153,8 +153,8 @@ task_map_emb_chart(::EmbRep, ::EmbRep, pme, task_map::TaskMap, CM, CN) =
     task_map_emb_chart(pme, task_map, CN)
 task_map_emb_chart(::EmbRep, ::ChartRep, pme, task_map::TaskMap, CM, CN) =
     task_map_emb_chart(pme, task_map, CN)
-function task_map_emb_chart(::ChartRep, ::EmbRep, pme, task_map::TaskMap{M,N,S}, CM,
-        CN::Chart{J,N}) where {M,N,S,J}
+function task_map_emb_chart(::ChartRep, ::EmbRep, pme, task_map::TaskMap{M,N}, CM,
+        CN::Chart{J,N}) where {M,N,J}
     pm = emb_to_chart(pme, CM)
     pne = task_map_chart_emb(pm, task_map, CM)
     pn = emb_to_chart(pne, CN)
@@ -166,8 +166,8 @@ end
 
 task_map_chart_emb(::EmbRep, ::EmbRep, pm, task_map::TaskMap, CM, CN) =
     task_map_chart_emb(pm, task_map, CM)
-function task_map_chart_emb(::EmbRep, ::ChartRep, pm, task_map::TaskMap{M,N,S}, CM::Chart{I,M},
-        CN) where {M,N,S,I}
+function task_map_chart_emb(::EmbRep, ::ChartRep, pm, task_map::TaskMap{M,N}, CM::Chart{I,M},
+        CN) where {M,N,I}
     pme = chart_to_emb(pm, CM)
     pn = task_map_emb_chart(pme, task_map, CN)
     pne = chart_to_emb(pn, CN)
@@ -179,19 +179,19 @@ function task_map_chart_emb(::ChartRep, ::ChartRep, pm, task_map::TaskMap, CM, C
     pne = chart_to_emb(pn, CN)
 end
 
-function task_map_chart(::EmbRep, ::EmbRep, pm, task_map::TaskMap{M,N,S}, CM::Chart{I,M},
-        CN::Chart{J,N}) where {M,N,S,I,J}
+function task_map_chart(::EmbRep, ::EmbRep, pm, task_map::TaskMap{M,N}, CM::Chart{I,M},
+        CN::Chart{J,N}) where {M,N,I,J}
     pme = chart_to_emb(pm, CM)
     pne = task_map_emb(pme, task_map)
     pn = emb_to_chart(pne, CN)
 end
-function task_map_chart(::EmbRep, ::ChartRep, pm, task_map::TaskMap{M,N,S}, CM::Chart{I,M},
-        CN) where {M,N,S,I}
+function task_map_chart(::EmbRep, ::ChartRep, pm, task_map::TaskMap{M,N}, CM::Chart{I,M},
+        CN) where {M,N,I}
     pme = chart_to_emb(pm, CM)
     pn = task_map_emb_chart(pme, task_map, CN)
 end
-function task_map_chart(::ChartRep, ::EmbRep, pm, task_map::TaskMap{M,N,S}, CM,
-        CN::Chart{J,N}) where {M,N,S,J}
+function task_map_chart(::ChartRep, ::EmbRep, pm, task_map::TaskMap{M,N}, CM,
+        CN::Chart{J,N}) where {M,N,J}
     pne = task_map_chart_emb(pm, task_map, CM)
     pn = emb_to_chart(pne, CN)
 end
@@ -236,25 +236,25 @@ task_differential_map_chart(pm, wme, task::TaskX, arg...) =
     task_differential_map_chart(pm, wme, base_task_map(task), arg...) 
 
 ## Tangent bundle task maps
-function task_map_emb(pme, task_map::TaskMapT{M,N,S}, arg...) where {M,N,S}
+function task_map_emb(pme, task_map::TaskMapT{M,N}, arg...) where {M,N}
     xme, vme = tangent_vector_emb_splitview(pme, T{M})
     xne, vne = task_differential_map_emb(xme, vme, task_map.base_map, arg...)
     pne = [xne; vne]
 end
 
-function task_map_emb_chart(pme, task_map::TaskMapT{M,N,S}, arg...) where {M,N,S}
+function task_map_emb_chart(pme, task_map::TaskMapT{M,N}, arg...) where {M,N}
     xme, vme = tangent_vector_emb_splitview(pme, T{M})
     xn, vn = task_differential_map_emb_chart(xme, vme, task_map.base_map, arg...)
     pn = [xn; vn]
 end
 
-function task_map_chart_emb(pm, task_map::TaskMapT{M,N,S}, arg...) where {M,N,S}
+function task_map_chart_emb(pm, task_map::TaskMapT{M,N}, arg...) where {M,N}
     xm, vm = tangent_vector_chart_splitview(pm, T{M})
     xne, vne = task_differential_map_chart_emb(xm, vm, task_map.base_map, arg...)
     pne = [xne; vne]
 end
 
-function task_map_chart(pm, task_map::TaskMapT{M,N,S}, arg...) where {M,N,S}
+function task_map_chart(pm, task_map::TaskMapT{M,N}, arg...) where {M,N}
     xm, vm = tangent_vector_chart_splitview(pm, T{M})
     xn, vn = task_differential_map_chart(xm, vm, task_map.base_map, arg...)
     pn = [xn; vn]
@@ -312,21 +312,21 @@ function task_jacobian_chart_dot(xm, vm, task_map::BaseTaskMap, arg...)
 end
 
 # Default coordinate representations for tasks on Rn
-domain_coord_rep(::TaskMap{ℝ{m},N,S}) where {m,N,S} = EmbRep()
-codomain_coord_rep(::TaskMap{M,ℝ{n},S}) where {M,n,S} = EmbRep()
+domain_coord_rep(::TaskMap{ℝ{m},N}) where {m,N} = EmbRep()
+codomain_coord_rep(::TaskMap{M,ℝ{n}}) where {M,n} = EmbRep()
 
 # Default home task charts for tasks on Rn
-home_task_chart(::Task{<:TaskMap{M,ℝ{n},S}}) where {M,n,S} = Chart{1,ℝ{n}}()
-home_task_chart(::Task{<:TaskMapT{M,ℝ{n},S}}) where {M,n,S} = Chart{1,ℝ{n}}()
-home_task_chart(::TaskGDS{<:TaskMapT{M,ℝ{n},S}}) where {M,n,S} = Chart{1,ℝ{n}}()
-home_task_chart(::Task{<:PTM{<:TaskMap{M1,ℝ{n1},S},<:TaskMap{M2,ℝ{n2},S}}}
-    ) where {M1,M2,n1,n2,S} = Chart{Tuple{1,1},PM{ℝ{n1},ℝ{n2}}}()
-home_task_chart(::Task{<:PTMT{<:PTM{<:TaskMap{M1,ℝ{n1},S},<:TaskMap{M2,ℝ{n2},S}}}}
-    ) where {M1,M2,n1,n2,S} = Chart{Tuple{1,1},PM{ℝ{n1},ℝ{n2}}}()
+home_task_chart(::Task{<:TaskMap{M,ℝ{n}}}) where {M,n} = Chart{1,ℝ{n}}()
+home_task_chart(::Task{<:TaskMapT{M,ℝ{n}}}) where {M,n} = Chart{1,ℝ{n}}()
+home_task_chart(::TaskGDS{<:TaskMapT{M,ℝ{n}}}) where {M,n} = Chart{1,ℝ{n}}()
+home_task_chart(::Task{<:PTM{<:TaskMap{M1,ℝ{n1}},<:TaskMap{M2,ℝ{n2}}}}
+    ) where {M1,M2,n1,n2} = Chart{Tuple{1,1},PM{ℝ{n1},ℝ{n2}}}()
+home_task_chart(::Task{<:PTMT{<:PTM{<:TaskMap{M1,ℝ{n1}},<:TaskMap{M2,ℝ{n2}}}}}
+    ) where {M1,M2,n1,n2} = Chart{Tuple{1,1},PM{ℝ{n1},ℝ{n2}}}()
 # Default home task charts for S1
-home_task_chart(::Task{<:TaskMap{M,S1,S}}) where {M,S} = Chart{Angleπ,S1}()
-home_task_chart(::Task{<:PTM{<:TaskMap{M1,ℝ{n},S},<:TaskMap{M2,S1,S}}}
-    ) where {M1,M2,n,S} = Chart{Tuple{1,Angleπ},PM{ℝ{n},S1}}()
+home_task_chart(::Task{<:TaskMap{M,S1}}) where M = Chart{Angleπ,S1}()
+home_task_chart(::Task{<:PTM{<:TaskMap{M1,ℝ{n}},<:TaskMap{M2,S1}}}
+    ) where {M1,M2,n} = Chart{Tuple{1,Angleπ},PM{ℝ{n},S1}}()
 
 ## Task Weighting
 task_weight(pn1, task::TaskX, C1) = 1. # Default weighting is 1 everywhere

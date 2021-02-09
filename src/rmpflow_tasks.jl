@@ -1,10 +1,10 @@
-function metric_curvature(xn, vn, task::TaskGDS{<:TaskMapT{M,N,S}}, C::Chart{I,N}) where {M,N,I,S}
+function metric_curvature(xn, vn, task::TaskGDS{<:TaskMapT{M,N}}, C::Chart{I,N}) where {M,N,I}
     n = dim(N)
     ∂g_∂v = ForwardDiff.jacobian(vn -> reshape(metric_chart(xn, vn, task, C), Size(n^2)), vn)
     Ξ = SMatrix{n,n,eltype(xn)}(0.5*sum(∂g_∂v[(i-1)*n+1:i*n,:].*vn[i] for i in 1:n)')
 end
 
-function force_curvature(xn, vn, task::TaskGDS{<:TaskMapT{M,N,S}}, C::Chart{I,N}) where {M,N,I,S}
+function force_curvature(xn, vn, task::TaskGDS{<:TaskMapT{M,N}}, C::Chart{I,N}) where {M,N,I}
     n = dim(N)
     ∂g_∂x = SMatrix{n^2,n,eltype(xn)}(ForwardDiff.jacobian(xn -> reshape(metric_chart(xn, vn, task, C), n^2), xn))
     ξ1 = reshape(∂g_∂x*vn, Size(n,n))*vn
@@ -12,8 +12,8 @@ function force_curvature(xn, vn, task::TaskGDS{<:TaskMapT{M,N,S}}, C::Chart{I,N}
     ξ = ξ1 - 0.5*ξ2
 end
 
-function single_task_components(xm, vm, task::TaskGDS{<:TaskMapT{M,N,S}}, CM::Chart{I,M},
-        CN::Chart{J,N}) where {M,N,S,I,J}
+function single_task_components(xm, vm, task::TaskGDS{<:TaskMapT{M,N}}, CM::Chart{I,M},
+        CN::Chart{J,N}) where {M,N,I,J}
     n = dim(N)
     xn = base_task_map_chart(xm, task, CM, CN)
     Jf = base_task_jacobian_chart(xm, task, CM, CN)
@@ -35,13 +35,13 @@ function single_task_components(xm, vm, task::TaskGDS{<:TaskMapT{M,N,S}}, CM::Ch
     JftAJf, JftA_a
 end
 
-function single_task_acceleration(xm, vm, task::TaskGDS{<:TaskMapT{M,N,S}}, CM::Chart{I,M},
-        CN::Chart{J,N}, robot_coord_rep=ChartRep()) where {M,N,S,I,J}
+function single_task_acceleration(xm, vm, task::TaskGDS{<:TaskMapT{M,N}}, CM::Chart{I,M},
+        CN::Chart{J,N}, robot_coord_rep=ChartRep()) where {M,N,I,J}
     m, n = dim(M), dim(N)
     (xm, vm) = robot_coord_rep == EmbRep() ? emb_to_chart_differential(xm, vm, CM) : (xm, vm)
     CN = isglobal(CN) ? CN : choose_chart_chart(xm, task, CM, CN)
     JftAJf, JftA_a = single_task_components(xm, vm, task, CM, CN)
-    σxddot = SMatrix{m,m,S}(pinv(Matrix(JftAJf)))*JftA_a
+    σxddot = SMatrix{m,m,eltype(xm)}(pinv(Matrix(JftAJf)))*JftA_a
     if robot_coord_rep == EmbRep()
         xme, vme, σxddot = chart_to_emb_differential(xm, vm, σxddot, CM)
     end

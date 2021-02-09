@@ -10,5 +10,5 @@ end
 PositionAroundPointT{M,N}(c::SVector{m,S}) where {M,N,S,m} =
     PositionAroundPointT{M,N,S,m}(PositionAroundPoint{M,N}(c))
 
-task_map_emb(::EmbRep, ::EmbRep, xm, task_map::PositionAroundPoint{ℝ{m},ℝ{m},S}) where {m,S} =
+task_map_emb(::EmbRep, ::EmbRep, xm, task_map::PositionAroundPoint{ℝ{m},ℝ{m}}) where m =
     xm - task_map.position_center

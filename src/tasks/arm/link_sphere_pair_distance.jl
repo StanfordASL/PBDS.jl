@@ -1,32 +1,31 @@
 if !(@isdefined LinkSpherePairDistance)
-    @computed struct LinkSpherePairDistance{Rn,R1,S,JC} <: TaskMap{Rn,R1,S}
+    @computed struct LinkSpherePairDistance{Rm,R1,S,JC} <: TaskMap{Rm,R1,S}
         state::MechanismState{S,S,S,JC}
         state_cache::StateCache{S,JC}
-        point1_cache::fulltype(FramePointCache{dim(Rn),S})
-        point2_cache::fulltype(FramePointCache{dim(Rn),S})
+        point1_cache::fulltype(FramePointCache{dim(Rm),S})
+        point2_cache::fulltype(FramePointCache{dim(Rm),S})
         radius1::S
         radius2::S
     end
 end
-struct LinkSpherePairDistanceT{Rn,R1,S,JC} <: TaskMapT{Rn,R1,S}
-    base_map::LinkSpherePairDistance{Rn,R1,S,JC}
+struct LinkSpherePairDistanceT{Rm,R1,S,JC} <: TaskMapT{Rm,R1,S}
+    base_map::LinkSpherePairDistance{Rm,R1,S,JC}
 end
-LinkSpherePairDistance{ℝ{n},R1}(state::MechanismState{S,S,S,JC}, state_cache,
-    point1_cache::FramePointCache{n,S}, point2_cache::FramePointCache{n,S},
-    radius1, radius2) where {n,R1,S,JC} =
-    LinkSpherePairDistance{ℝ{n},R1,S,JC}(state, state_cache, point1_cache, point2_cache,
-    radius1, radius2)
+function LinkSpherePairDistance{ℝ{m},R1}(state::MechanismState{S,S,S,JC}, state_cache,
+        point1_cache::FramePointCache{m,S}, point2_cache::FramePointCache{m,S},
+        radius1, radius2) where {m,R1,S,JC}
+    LinkSpherePairDistance{ℝ{m},R1,S,JC}(state, state_cache, point1_cache, point2_cache,
+        radius1, radius2)
+end
 
-function task_map_emb(::EmbRep, ::EmbRep, xme,
-        task_map::LinkSpherePairDistance{ℝ{n},R1,S,JC}) where {n,S,JC}
+function task_map_emb(::EmbRep, ::EmbRep, xme, task_map::LinkSpherePairDistance{ℝ{m},R1}) where m
     rframe = root_frame(task_map.state.mechanism)
     x1 = transform(task_map.state, task_map.point1_cache.point, rframe).v
     x2 = transform(task_map.state, task_map.point2_cache.point, rframe).v
     SA[norm(x2 - x1) - task_map.radius1 - task_map.radius2]
 end
 
-function task_jacobian_emb(xme, task_map::LinkSpherePairDistance{ℝ{n},R1,S,JC},
-        arg...) where {n,S,JC}
+function task_jacobian_emb(xme, task_map::LinkSpherePairDistance{ℝ{m},R1}, arg...) where m
     state_cache = task_map.state_cache
     point1_cache, point2_cache = task_map.point1_cache, task_map.point2_cache
     link1_cache, link2_cache = point1_cache.link_cache, point2_cache.link_cache
@@ -56,11 +55,10 @@ function task_jacobian_emb(xme, task_map::LinkSpherePairDistance{ℝ{n},R1,S,JC}
 
     Jf = Jn*Jlp
 end
-task_jacobian_chart(xm, task_map::LinkSpherePairDistance{ℝ{n},R1,S,JC},
-    CM::Chart{1,ℝ{n}}, CN::Chart{1,R1}) where {n,S,JC} = task_jacobian_emb(xm, task_map)
+task_jacobian_chart(xm, task_map::LinkSpherePairDistance{ℝ{m},R1},
+    CM::Chart{1,ℝ{m}}, CN::Chart{1,R1}) where m = task_jacobian_emb(xm, task_map)
 
-function task_jacobian_emb_dot(xme, vme, task_map::LinkSpherePairDistance{ℝ{m},R1,S,JC},
-        arg...) where {m,S,JC}
+function task_jacobian_emb_dot(xme, vme, task_map::LinkSpherePairDistance{ℝ{m},R1}, arg...) where m
     state_cache = task_map.state_cache
     point1_cache, point2_cache = task_map.point1_cache, task_map.point2_cache
     link1_cache, link2_cache = point1_cache.link_cache, point2_cache.link_cache
@@ -108,8 +106,8 @@ function task_jacobian_emb_dot(xme, vme, task_map::LinkSpherePairDistance{ℝ{m}
 
     Jf_dot = Jn_dot*Jlp + Jn*Jlp_dot
 end
-task_jacobian_chart_dot(xm, task_map::LinkSpherePairDistance{ℝ{n},R1,S,JC},
-    CM::Chart{1,ℝ{n}}, CN::Chart{1,R1}) where {n,S,JC} = task_jacobian_emb_dot(xm, task_map)
+task_jacobian_chart_dot(xm, task_map::LinkSpherePairDistance{ℝ{m},R1},
+    CM::Chart{1,ℝ{m}}, CN::Chart{1,R1}) where m = task_jacobian_emb_dot(xm, task_map)
 
 # Distances between points, with positions input as a single stacked vector 
 function stacked_position_distance(positions)
@@ -148,8 +146,8 @@ end
 
 # For verification
 # A bit slower than custom function after precomputation and caching
-function task_jacobian_emb2(xme, task_map::LinkSpherePairDistance{ℝ{n},R1,S,JC},
-        arg...) where {n,S,JC}
+function task_jacobian_emb2(xme, task_map::LinkSpherePairDistance{ℝ{m},R1}, arg...) where m
+    S = eltype(xme)
     state = task_map.state
     rframe = root_frame(state.mechanism)
     point1_cache, point2_cache = task_map.point1_cache, task_map.point2_cache
@@ -159,13 +157,13 @@ function task_jacobian_emb2(xme, task_map::LinkSpherePairDistance{ℝ{n},R1,S,JC
     point2_world = transform(state, point2, rframe)
     x1, x2 = point1_world.v, point2_world.v
 
-    Jf1 = SMatrix{3,n,S}(point_jacobian(state, link1_cache.path, point1_world).J)
-    Jf2 = SMatrix{3,n,S}(point_jacobian(state, link2_cache.path, point2_world).J)
+    Jf1 = SMatrix{3,m,S}(point_jacobian(state, link1_cache.path, point1_world).J)
+    Jf2 = SMatrix{3,m,S}(point_jacobian(state, link2_cache.path, point2_world).J)
 
-    SMatrix{1,n,S}((Jf2' - Jf1')*(x2 - x1)/norm(x2-x1))
+    SMatrix{1,m,S}((Jf2' - Jf1')*(x2 - x1)/norm(x2-x1))
 end
 
-function task_map_emb_for_jdot(xme, task_map::LinkSpherePairDistance{ℝ{n},R1,S,JC}) where {n,S,JC}
+function task_map_emb_for_jdot(xme, task_map::LinkSpherePairDistance{ℝ{m},R1}) where m
     state = task_map.state_cache[eltype(xme)]
     rframe = root_frame(state.mechanism)
     set_configuration!(state, xme)
@@ -173,17 +171,16 @@ function task_map_emb_for_jdot(xme, task_map::LinkSpherePairDistance{ℝ{n},R1,S
     x2 = transform(state, task_map.point2_cache.point, rframe).v
     SA[norm(x2 - x1) - task_map.radius1 - task_map.radius2]
 end 
-task_jacobian_emb_for_jdot(xme, task_map::LinkSpherePairDistance{ℝ{n},R1,S,JC}) where {n,S,JC} =
+task_jacobian_emb_for_jdot(xme, task_map::LinkSpherePairDistance{ℝ{m},R1}) where m =
     ForwardDiff.jacobian(xme -> task_map_emb_for_jdot(xme, task_map), xme)
 
-function task_jacobian_emb_dot2(xme, vme, task_map::LinkSpherePairDistance{ℝ{m},R1,S,JC},
-        arg...) where {m,S,JC}
-    n = embdim(codomain_manifold(task_map))
-    ∇xf = ForwardDiff.jacobian(xme -> SVector{m*n,eltype(xme)}(
+function task_jacobian_emb_dot2(xme, vme, task_map::LinkSpherePairDistance{ℝ{m},R1}, arg...) where m
+    n, S = embdim(codomain_manifold(task_map)), eltype(xme)
+    ∇xf = ForwardDiff.jacobian(xme -> SVector{m*n,S}(
         reshape(task_jacobian_emb_for_jdot(xme, task_map), m*n)),
-        xme)::SArray{Tuple{m*n,m},eltype(xme),2,m*m*n}
+        xme)::SArray{Tuple{m*n,m},S,2,m*m*n}
     Jfdot_emb = reshape(∇xf*vme, Size(n,m))
 end
 
-task_jacobian_chart_dot(xm, vm, task_map::LinkSpherePairDistance{ℝ{n},R1,S,JC},
-    CM::Chart{1,ℝ{n}}, CN::Chart{1,R1}) where {n,S,JC} = task_jacobian_emb_dot(xm, vm, task_map)
+task_jacobian_chart_dot(xm, vm, task_map::LinkSpherePairDistance{ℝ{m},R1},
+    CM::Chart{1,ℝ{m}}, CN::Chart{1,R1}) where m = task_jacobian_emb_dot(xm, vm, task_map)

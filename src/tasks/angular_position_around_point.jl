@@ -11,10 +11,10 @@ AngularPositionAroundPointT{M,N}(c::SVector{m,S}) where {M,N,S,m} =
     AngularPositionAroundPointT{M,N,S,m}(AngularPositionAroundPoint{M,N}(c))
 
 # S1
-codomain_coord_rep(::AngularPositionAroundPoint{R2,S1,S}) where S = ChartRep()
+codomain_coord_rep(::AngularPositionAroundPoint{R2,S1}) = ChartRep()
 
-function task_map_emb_chart(::EmbRep, ::ChartRep, xme,
-        task_map::AngularPositionAroundPoint{R2,S1,S}, ::Chart{Angleπ,S1}) where S
+function task_map_emb_chart(::EmbRep, ::ChartRep, xme, task_map::AngularPositionAroundPoint{R2,S1}, 
+        ::Chart{Angleπ,S1})
     a = xme - task_map.position_center
     d = norm(a)
     if d == 0
@@ -25,18 +25,17 @@ function task_map_emb_chart(::EmbRep, ::ChartRep, xme,
     end
 end
 
-function task_map_emb_chart(::EmbRep, ::ChartRep, xme,
-        task_map::AngularPositionAroundPoint{R2,S1,S}, C2π::Chart{Angle2π,S1}) where S
+function task_map_emb_chart(::EmbRep, ::ChartRep, xme, task_map::AngularPositionAroundPoint{R2,S1}, 
+        C2π::Chart{Angle2π,S1})
     Cπ = Chart{Angleπ,S1}()
     xnπ = task_map_emb_chart(xme, task_map, Cπ)
     chart_transition(xnπ, Cπ, C2π)
 end
 
 # S2
-codomain_coord_rep(::AngularPositionAroundPoint{R3,S2,S}) where S = EmbRep()
+codomain_coord_rep(::AngularPositionAroundPoint{R3,S2}) = EmbRep()
 
-function task_map_emb(::EmbRep, ::EmbRep, xme,
-        task_map::AngularPositionAroundPoint{R3,S2,S}) where S
+function task_map_emb(::EmbRep, ::EmbRep, xme, task_map::AngularPositionAroundPoint{R3,S2})
     Δx = xme - task_map.position_center
     d = norm(Δx)
     if d == 0

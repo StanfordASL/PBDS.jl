@@ -3,7 +3,8 @@ function permute_chart(pn, ::Type{N}) where N <: Manifold
     pn_perm = [pn[SVector{n}(n+1:2n)]; pn[SVector{n}(1:n)]]
 end
 
-function permuted_task_map_chart(pm, task_map::TaskMapT{M,N,S}, CM::Chart{I,M}, CN::Chart{J,N}) where {M,N,S,I,J}
+function permuted_task_map_chart(pm, task_map::TaskMapT{M,N}, CM::Chart{I,M},
+        CN::Chart{J,N}) where {M,N,I,J}
     xm, vm = tangent_vector_chart_splitview(pm, T{M})
     xn = base_task_map_chart(xm, task_map, CM, CN)
     ∂xn_∂xm = base_task_jacobian_chart(xm, task_map, CM, CN)
@@ -11,8 +12,7 @@ function permuted_task_map_chart(pm, task_map::TaskMapT{M,N,S}, CM::Chart{I,M}, 
     pn_perm = [vn; xn]
 end
 
-function permuted_metric_chart(pn_perm, task::Task{<:TaskMapT{M,N,S}},
-        C::Chart{I,N}) where {M,N,S,I}
+function permuted_metric_chart(pn_perm, task::Task{<:TaskMapT{M,N}}, C::Chart{I,N}) where {M,N,I}
     n = dim(N)
     pn = permute_chart(pn_perm, N)
     g = metric_chart(pn, task, C)
@@ -26,9 +26,9 @@ function permuted_metric_chart(pn_perm, task::Task{<:TaskMapT{M,N,S}},
 end
 
 # indexing convention Γ^k_ij: (i, j, k)
-function permuted_christoffel_symbols(pn_perm, task::Task{<:TaskMapT{M,N,S}},
-        C::Chart{I,N}) where {M,N,I,S}
-    n = dim(T{N})
+function permuted_christoffel_symbols(pn_perm, task::Task{<:TaskMapT{M,N}},
+        C::Chart{I,N}) where {M,N,I}
+    n, S = dim(T{N}), eltype(pn_perm)
     Ginv = inv(permuted_metric_chart(pn_perm, task, C))
     ∂G_∂xn_matrix = ForwardDiff.jacobian(
         pn_perm -> reshape(permuted_metric_chart(pn_perm, task, C), Size(n^2)), pn_perm)
@@ -43,23 +43,21 @@ function permuted_task_jacobian_chart(pm, task_map::TaskMapT{M,N,S}, arg...)::
     ForwardDiff.jacobian(pm -> permuted_task_map_chart(pm, task_map, arg...), pm)
 end
 
-function permuted_potential_forces(pn, task::Task{<:TaskMapT{M,N,S}},
-        CN::Chart{J,N}) where {M,N,S,J}
+function permuted_potential_forces(pn, task::Task{<:TaskMapT{M,N}}, CN::Chart{J,N}) where {M,N,J}
     n = dim(N)
     xn, vn = tangent_vector_chart_splitview(pn, T{N})
     ∂Φ_∂xn = ForwardDiff.gradient(xn -> potential(xn, task, CN), xn)
     [@SVector zeros(n); -∂Φ_∂xn]
 end
 
-function permuted_dissipative_forces(pn, task::Task{<:TaskMapT{M,N,S}},
-        CN::Chart{J,N}) where {M,N,S,J}
+function permuted_dissipative_forces(pn, task::Task{<:TaskMapT{M,N}}, CN::Chart{J,N}) where {M,N,J}
     n = dim(N)
     xn, vn = tangent_vector_chart_splitview(pn, T{N})
     [@SVector zeros(n); dissipative_forces(xn, vn, task, CN)]
 end
 
-function single_task_components(xm, vm, task::Task{<:TaskMapT{M,N,S}}, CM::Chart{I,M},
-        CN::Chart{J,N}) where {M,N,S,I,J}
+function single_task_components(xm, vm, task::Task{<:TaskMapT{M,N}}, CM::Chart{I,M},
+        CN::Chart{J,N}) where {M,N,I,J}
     m, n = dim(M), dim(N)
     mt, nt = dim(T{M}), dim(T{N})
     
@@ -81,9 +79,9 @@ function single_task_components(xm, vm, task::Task{<:TaskMapT{M,N,S}}, CM::Chart
     ℱ = ℱ_pot + ℱ_dis
     
     nt_inds, n_inds, m_inds = static(1):static(nt), static(1):static(n), static(1):static(m)
-    Ξx = SMatrix{n,m,S}([sum(Tuple(JF_perm[l,j]*Γ_perm[l,h+n,k+n]*Jf[h,r]*σxdot[r]
+    Ξx = SMatrix{n,m,eltype(xm)}([sum(Tuple(JF_perm[l,j]*Γ_perm[l,h+n,k+n]*Jf[h,r]*σxdot[r]
         for l=nt_inds, h=n_inds, r=m_inds)) for k=n_inds, j=m_inds])
-    Ξv = SMatrix{n,m,S}([sum(Tuple(JF_perm[l,j+m]*Γ_perm[l,h+n,k+n]*Jf[h,r]*σxdot[r]
+    Ξv = SMatrix{n,m,eltype(xm)}([sum(Tuple(JF_perm[l,j+m]*Γ_perm[l,h+n,k+n]*Jf[h,r]*σxdot[r]
         for l=nt_inds, h=n_inds, r=m_inds)) for k=n_inds, j=m_inds])
     λ = task_weight(pn, task, CN)
 
@@ -94,12 +92,12 @@ function single_task_components(xm, vm, task::Task{<:TaskMapT{M,N,S}}, CM::Chart
     JfΞvt_JfΞv, JfΞvt_A
 end
 
-function single_task_acceleration(xm, vm, task::Task{<:TaskMapT{M,N,S}}, CM::Chart{I,M},
-        CN::Chart{J,N}) where {M,N,S,I,J}
+function single_task_acceleration(xm, vm, task::Task{<:TaskMapT{M,N}}, CM::Chart{I,M},
+        CN::Chart{J,N}) where {M,N,I,J}
     m, n = dim(M), dim(N)
     CN = isglobal(CN) ? CN : choose_chart_emb(xm, task, CM, CN)
     Jft_JfΞv, Jft_A = single_task_components(xm, vm, task, CM, CN)
-    σxddot = SMatrix{m,m,S}(pinv(Matrix(Jft_JfΞv)))*Jft_A
+    σxddot = SMatrix{m,m,eltype(xm)}(pinv(Matrix(Jft_JfΞv)))*Jft_A
     σxddot, CN
 end
 
