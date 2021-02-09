@@ -5,6 +5,14 @@ using NBInclude
 @testset "Examples" begin
     dir = joinpath(@__DIR__, "..", "examples", "PBDS")
 
+    test_notebook = "R7Arm_DynamicMugGrasping"
+    @testset "$test_notebook" begin
+        file = string(test_notebook, ".ipynb")
+        @nbinclude(joinpath(dir, file))
+        @test root.children[end-1].children[3].traj_log.x[end][1] .< 5e-3
+        println("Finished example ", test_notebook)
+    end
+
     test_notebooks = ["R1_To_R1PointPositionAttractor",
                       "R2_To_R1PointDistanceAttractor_S1Damping",
                       "R2_To_R1PointDistanceAttractor_S1Damping_R1BoxAvoidance",
@@ -21,13 +29,5 @@ using NBInclude
             @test all([norm(traj.xm[end] - xm_goal) for traj in trajs] .< 5e-2)
             println("Finished example ", test_notebook)
         end
-    end
-
-    test_notebook = "R7Arm_DynamicMugGrasping"
-    @testset "$test_notebook" begin
-        file = string(test_notebook, ".ipynb")
-        @nbinclude(joinpath(dir, file))
-        @test root.children[end-1].children[3].traj_log.x[end][1] .< 5e-3
-        println("Finished example ", test_notebook)
     end
 end
