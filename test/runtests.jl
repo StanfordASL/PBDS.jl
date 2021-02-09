@@ -3,6 +3,7 @@ using Test
 using NBInclude
 
 @testset "Examples" begin
+    "no_plots" in ARGS && (global const no_plots = true)
     dir = joinpath(@__DIR__, "..", "examples", "PBDS")
 
     test_notebook = "R7Arm_DynamicMugGrasping"
