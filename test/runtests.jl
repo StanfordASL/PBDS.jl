@@ -27,8 +27,6 @@ using NBInclude
                       "R3_To_R1PointDistanceAttractor_S2Damping_R1SphereAvoidance",
                       "S2_To_R1Attractor_S2Damping_R1ObstacleAvoidance"]
 
-    test_notebooks = ["R3_To_R1PointDistanceAttractor_S2Damping_R1SphereAvoidance"]
-
     for test_notebook in test_notebooks
         @testset "$test_notebook" begin
             file = string(test_notebook, ".ipynb")
