@@ -9,3 +9,7 @@ task_map_emb(::EmbRep, ::EmbRep, xm, task_map::Identity{ℝ{m},ℝ{m}}) where m 
 task_map_emb(::EmbRep, ::EmbRep, xme, task_map::Identity{𝕊{m},𝕊{m}}) where m = xme
 domain_coord_rep(::Identity{𝕊{n},𝕊{n}}) where n = EmbRep()
 codomain_coord_rep(::Identity{𝕊{n},𝕊{n}}) where n = EmbRep()
+
+task_map_chart(::ChartRep, ::ChartRep, xm, task_map::Identity{SO3,SO3}, CM, CN) = xm
+domain_coord_rep(::Identity{SO3,SO3}) = ChartRep()
+codomain_coord_rep(::Identity{SO3,SO3}) = ChartRep()

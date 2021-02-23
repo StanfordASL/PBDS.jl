@@ -1,4 +1,5 @@
 include(joinpath("manifolds", "SN.jl"))
+include(joinpath("manifolds", "SO3.jl"))
 include(joinpath("manifolds", "RN.jl"))
 include(joinpath("manifolds", "product_manifolds.jl"))
 
@@ -115,6 +116,16 @@ function chart_transition_differential(x1, v1, C1::Chart{I,M}, C2::Chart{J,M}) w
     ∂x2_∂x1 = chart_transition_jacobian(x1, C1, C2)
     v2 = ∂x2_∂x1*v1
     x2, v2
+end
+
+function chart_transition_differential(x1, v1, a1, C1::Chart{I,M}, C2::Chart{J,M}) where {M,I,J}
+    x2 = chart_transition(x1, C1, C2)
+    p1 = [x1; v1]
+    w1 = [v1; a1]
+    ∂p2_∂p1 = chart_transition_jacobian(p1, T(C1), T(C2))
+    w2 = ∂p2_∂p1*w1
+    v2, a2 = tangent_vector_chart_splitview(w2, T{M})
+    x2, v2, a2
 end
 
 function chart_transition(p1, C1::Chart{I,T{M}}, C2::Chart{J,T{M}}) where {M,I,J}

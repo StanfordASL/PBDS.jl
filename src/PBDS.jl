@@ -12,13 +12,16 @@ import RigidBodyDynamics: CustomCollections, CacheElement, isdirty, setdirty!
 import GeometryBasics: min_euclidean, min_euclideansq, min_dist_dim
 
 # types.jl
-export TangentBundle, T, ProductManifold, PM, ProductTaskMap, PTM, Chart, ChartList, TaskList,
-       TaskGDSList, EmbRep, ChartRep
+export TangentBundle, T, ProductManifold, PM, TaskMap, ProductTaskMap, PTM,
+       Chart, ChartList, TaskList, TaskGDSList, EmbRep, ChartRep
 # manifolds.jl
 export dim, embdim, basedim, default_chart, choose_chart_emb, choose_chart_chart, base,
-       emb_to_chart, chart_to_emb
+       emb_to_chart, chart_to_emb, emb_to_chart_differential, chart_to_emb_differential,
+       emb_to_chart_jacobian, chart_to_emb_jacobian, chart_transition,
+       chart_transition_differential, chart_transition_jacobian
 # manifolds/
-export ℝ, 𝕊, SterProj, SterProjSouth, SterProjNorth, Angleπ, Angle2π
+export ℝ, 𝕊, SterProj, SterProjSouth, SterProjNorth, Angleπ, Angle2π,
+       SO3, ExpMap, ExpMap0, ExpMapX, ExpMapY, ExpMapZ
 # tasks.jl
 export task_map_emb, task_map_emb_chart, task_map_chart_emb, task_map_chart,
        base_task_map_emb, base_task_map_emb_chart, base_task_map_chart_emb, base_task_map_chart,

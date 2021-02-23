@@ -1,13 +1,13 @@
 # indexing convention for ∂G_ij/∂p^k: (i, j, k)
 # indexing convention Γ^k_ij: (i, j, k)
-function christoffel_symbols(pn, task::Task{<:TaskMapT{M,N,S}}, C::Chart{I,N}) where {M,N,I,S}
-    n = dim(T{N})
+function christoffel_symbols(pn, task::Task{<:TaskMapT{M,N}}, C::Chart{I,N}) where {M,N,I}
+    n, S = dim(T{N}), eltype(pn)
     Ginv = inv(metric_chart(pn, task, C))
     ∂G_∂xn_matrix = ForwardDiff.jacobian(pn -> reshape(metric_chart(pn, task, C), Size(n^2)), pn)
     ∂G_∂xn_matrix == (@SMatrix zeros(n^2,n)) && return @SArray zeros(n,n,n)
     ∂G_∂xn = reshape(∂G_∂xn_matrix, Size(n,n,n))
     inds = static(1):static(n)
-    Γ = SArray{Tuple{n,n,n},S}([0.5*sum(Tuple(Ginv[k,l]*(∂G_∂xn[j,l,i]+∂G_∂xn[i,l,j]-∂G_∂xn[i,j,l])
+    Γ = SArray{Tuple{n,n,n},}([0.5*sum(Tuple(Ginv[k,l]*(∂G_∂xn[j,l,i]+∂G_∂xn[i,l,j]-∂G_∂xn[i,j,l])
         for l in inds)) for i in inds, j in inds, k in inds])
 end
 
